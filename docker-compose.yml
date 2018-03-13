@@ -24,7 +24,7 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
     volumes:
-      - ./wp-content:/var/www/html/wp-content
+      - ./wp-content/plugins/coopcycle:/var/www/html/wp-content/plugins/coopcycle
 
 volumes:
   dbdata:
