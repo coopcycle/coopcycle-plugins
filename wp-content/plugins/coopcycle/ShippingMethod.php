@@ -95,8 +95,8 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
                 'timeout' => 30,
                 'sslverify' => false,
                 'headers' => array(
-                    'Content-Type' => 'application/json',
-                    'X-Auth-Token' => $api_token
+                    'Content-Type' => 'application/ld+json',
+                    'Authorization' => sprintf('Bearer %s', $api_token)
                 )
             ));
 

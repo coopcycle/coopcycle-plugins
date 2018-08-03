@@ -16,8 +16,8 @@ class CoopCycle_HttpClient
         $url = $this->base_url . $uri;
 
         $headers = array(
-            'Content-Type' => 'application/json',
-            'X-Auth-Token' => $this->api_token
+            'Content-Type' => 'application/ld+json',
+            'Authorization' => sprintf('Bearer %s', $this->api_token)
         );
 
         $response = wp_remote_post($url, array(
