@@ -68,7 +68,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
             $httpClient = new CoopCycle_HttpClient();
 
-            $delivery = $httpClient->post('/api/stores/deliveries', $data);
+            $delivery = $httpClient->post('/api/deliveries', $data);
         }
     }
 
