@@ -1,5 +1,5 @@
 release:
 	@mkdir -p dist/
 	@rm -f dist/coopcycle-$(VERSION).zip
-	@zip -r dist/coopcycle-$(VERSION).zip -j -q wp-content/plugins/coopcycle
+	@git archive -o dist/coopcycle-$(VERSION).zip HEAD
 	@printf "\e[0;32mCreated release $(VERSION)\e[0m\n"
