@@ -4,7 +4,7 @@
  * Plugin Name: CoopCycle
  * Plugin URI: https://coopcycle.org/
  * Description: CoopCycle plugin for WordPress
- * Version: 0.2
+ * Version: 0.3.0
  */
 
 if (is_admin()) {
