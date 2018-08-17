@@ -33,6 +33,8 @@ services:
 
   wp:
     image: wordpress:cli
+    # https://github.com/docker-library/wordpress/issues/256
+    user: xfs
     depends_on:
       - wordpress
     volumes:
