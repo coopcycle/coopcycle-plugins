@@ -61,7 +61,11 @@ class CoopCycleSettingsPage
     {
         register_setting(
             'coopcycle_woocommerce',
-            'coopcycle_base_url'
+            'coopcycle_base_url',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => array($this, 'normalize_base_url')
+            )
         );
 
         register_setting(
@@ -95,6 +99,17 @@ class CoopCycleSettingsPage
 
     public function print_section_info()
     {
+    }
+
+    public function normalize_base_url($base_url)
+    {
+        if (0 === preg_match('#^https?://#', $base_url)) {
+            $base_url = 'http://' . $base_url;
+        }
+
+        // TODO Guess http / https
+
+        return $base_url;
     }
 
     public function coopcycle_base_url_callback()
