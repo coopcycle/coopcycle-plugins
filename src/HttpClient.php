@@ -11,6 +11,26 @@ class CoopCycle_HttpClient
         $this->api_token = get_option('coopcycle_api_token');
     }
 
+    public function get($uri)
+    {
+        $url = $this->base_url . $uri;
+
+        $headers = array(
+            'Content-Type' => 'application/ld+json',
+            'Authorization' => sprintf('Bearer %s', $this->api_token)
+        );
+
+        $response = wp_remote_get($url, array(
+            'timeout' => 30,
+            'sslverify' => false,
+            'headers' => $headers,
+        ));
+
+        $body = wp_remote_retrieve_body($response);
+
+        return json_decode($body, true);
+    }
+
     public function post($uri, array $data)
     {
         $url = $this->base_url . $uri;
