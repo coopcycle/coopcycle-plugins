@@ -7,13 +7,13 @@
  * Version: 0.3.0
  */
 
+require_once __DIR__ . '/src/HttpClient.php';
+
 if (is_admin()) {
-    require __DIR__ . '/src/CoopCycleSettingsPage.php';
+    require_once __DIR__ . '/src/CoopCycleSettingsPage.php';
     $settings_page = new CoopCycleSettingsPage();
     add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), array($settings_page, 'add_action_link'));
 }
-
-require __DIR__ . '/src/HttpClient.php';
 
 function coopcycle_next_shipping_date(\DateTime $now = null) {
 
