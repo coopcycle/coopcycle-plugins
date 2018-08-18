@@ -29,3 +29,6 @@ if [ $WORDPRESS_IMPORTER_INSTALLED != 0 ]
 then
     docker-compose run wp plugin install wordpress-importer --activate
 fi
+
+# FIXME Doesn't work
+# docker-compose run wp wc tool install_pages
