@@ -8,12 +8,12 @@
  */
 
 if (is_admin()) {
-    require __DIR__ . '/CoopCycleSettingsPage.php';
+    require __DIR__ . '/src/CoopCycleSettingsPage.php';
     $settings_page = new CoopCycleSettingsPage();
     add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), array($settings_page, 'add_action_link'));
 }
 
-require __DIR__ . '/HttpClient.php';
+require __DIR__ . '/src/HttpClient.php';
 
 function coopcycle_next_shipping_date(\DateTime $now = null) {
 
@@ -81,7 +81,7 @@ coopcycle_next_shipping_date();
 if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 
     function coopcycle_shipping_method_init() {
-        require __DIR__ . '/ShippingMethod.php';
+        require __DIR__ . '/src/ShippingMethod.php';
     }
 
     add_action('woocommerce_shipping_init', 'coopcycle_shipping_method_init');
