@@ -84,26 +84,19 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
             }
 
             $params = [
-                'dropoffAddress' => $destination['address'],
+                'dropoffAddress' => trim(sprintf('%s %s %s',
+                    $destination['address'],
+                    $destination['postcode'],
+                    $destination['city']
+                )),
             ];
 
-            $base_url = get_option('coopcycle_base_url');
-            $api_token = get_option('coopcycle_api_token');
+            $httpClient = new CoopCycle_HttpClient();
 
-            $endpoint_url = $base_url . '/api/pricing/calculate-price?' . http_build_query($params);
-            $response = wp_remote_get($endpoint_url, array(
-                'timeout' => 30,
-                'sslverify' => false,
-                'headers' => array(
-                    'Content-Type' => 'application/ld+json',
-                    'Authorization' => sprintf('Bearer %s', $api_token)
-                )
-            ));
+            $uri = sprintf('/api/pricing/calculate-price?%s', http_build_query($params));
+            $cost = $httpClient->get($uri);
 
-            if (is_array($response)) {
-
-                $response_code = wp_remote_retrieve_response_code($response);
-                $cost = json_decode(wp_remote_retrieve_body($response), true);
+            if ($cost) {
 
                 $rate = array(
                     'id' => $this->get_rate_id(),

@@ -132,9 +132,27 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         echo '</div>';
     }
 
+    function coopcycle_checkout_process() {
+        // TODO Make sure shipping time is valid
+        if (!$_POST['order_shipping_date'] || !$_POST['order_shipping_time']) {
+            wc_add_notice(__('Please choose a shipping date.', 'coopcycle'), 'error');
+        }
+    }
+
+    function coopcycle_checkout_update_order_meta($order_id) {
+        if (!empty($_POST['order_shipping_date'])) {
+            update_post_meta($order_id, 'order_shipping_date', sanitize_text_field($_POST['order_shipping_date']));
+        }
+        if (!empty($_POST['order_shipping_time'])) {
+            update_post_meta($order_id, 'order_shipping_time', sanitize_text_field($_POST['order_shipping_time']));
+        }
+    }
+
     // woocommerce_before_order_notes
     // woocommerce_after_order_notes
     add_action('woocommerce_before_order_notes', 'coopcycle_custom_checkout_field');
+    add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
+    add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
 
     function coopcycle_enqueue_scripts() {
 
@@ -152,9 +170,12 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     function coopcycle_woocommerce_order_status_changed($order_id, $old_status, $new_status) {
 
-        if ('completed' === $new_status) {
+        if ('processing' === $new_status) {
 
             $order = wc_get_order($order_id);
+
+            $order_shipping_date = $order->get_meta('order_shipping_date', true);
+            $order_shipping_time = $order->get_meta('order_shipping_time', true);
 
             // Array
             // (
@@ -170,19 +191,25 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             // )
             $shipping_address = $order->get_address('shipping');
 
-            $data = [
-                'dropoff' => [
+            $data = array(
+                // We only specify the dropoff data
+                // Pickup is fully implicit
+                'dropoff' => array(
                     'address' => sprintf('%s %s %s',
                         $shipping_address['address_1'],
                         $shipping_address['postcode'],
                         $shipping_address['city']
-                    )
-                ]
-            ];
+                    ),
+                    'doneBefore' => sprintf('%s %s', $order_shipping_date, $order_shipping_time),
+                )
+            );
 
             $httpClient = new CoopCycle_HttpClient();
-
             $delivery = $httpClient->post('/api/deliveries', $data);
+
+            // Save task id in order meta
+            $order->update_meta_data('task_id', $delivery['dropoff']['id']);
+            $order->save();
         }
     }
 
