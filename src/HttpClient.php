@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/HttpClientException.php';
+
 class CoopCycle_HttpClient
 {
     private $base_url;
@@ -26,6 +28,10 @@ class CoopCycle_HttpClient
             'headers' => $headers,
         ));
 
+        if (is_wp_error($response)) {
+            throw new HttpClientException($response);
+        }
+
         $body = wp_remote_retrieve_body($response);
 
         return json_decode($body, true);
@@ -46,6 +52,10 @@ class CoopCycle_HttpClient
             'headers' => $headers,
             'body' => json_encode($data),
         ));
+
+        if (is_wp_error($response)) {
+            throw new HttpClientException($response);
+        }
 
         $body = wp_remote_retrieve_body($response);
 

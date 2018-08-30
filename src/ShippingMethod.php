@@ -78,20 +78,27 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
             $httpClient = new CoopCycle_HttpClient();
 
             $uri = sprintf('/api/pricing/calculate-price?%s', http_build_query($params));
-            $cost = $httpClient->get($uri);
 
-            if ($cost) {
+            try {
 
-                $rate = array(
-                    'id' => $this->get_rate_id(),
-                    'label' => $this->get_option('title'),
-                    'cost' => number_format($cost / 100, 2),
-                    'package' => $package,
-                    // 'taxes' => '???',
-                    'calc_tax' => 'per_order'
-                );
+                $cost = $httpClient->get($uri);
 
-                $this->add_rate($rate);
+                if ($cost) {
+
+                    $rate = array(
+                        'id' => $this->get_rate_id(),
+                        'label' => $this->get_option('title'),
+                        'cost' => number_format($cost / 100, 2),
+                        'package' => $package,
+                        // 'taxes' => '???',
+                        'calc_tax' => 'per_order'
+                    );
+
+                    $this->add_rate($rate);
+                }
+
+            } catch (HttpClientException $e) {
+                // TODO Should we show a message to the user?
             }
         }
     }

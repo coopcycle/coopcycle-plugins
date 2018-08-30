@@ -205,11 +205,19 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             );
 
             $httpClient = new CoopCycle_HttpClient();
-            $delivery = $httpClient->post('/api/deliveries', $data);
 
-            // Save task id in order meta
-            $order->update_meta_data('task_id', $delivery['dropoff']['id']);
-            $order->save();
+            try {
+
+                $delivery = $httpClient->post('/api/deliveries', $data);
+
+                // Save task id in order meta
+                $order->update_meta_data('task_id', $delivery['dropoff']['id']);
+                $order->save();
+
+            } catch (HttpClientException $e) {
+                // TODO Store something to retry API call later?
+            }
+
         }
     }
 
