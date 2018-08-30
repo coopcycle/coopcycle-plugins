@@ -4,7 +4,7 @@
  * Plugin Name: CoopCycle
  * Plugin URI: https://coopcycle.org/
  * Description: CoopCycle plugin for WordPress
- * Version: 0.3.0
+ * Version: 0.4.0
  */
 
 require_once __DIR__ . '/src/HttpClient.php';
