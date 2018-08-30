@@ -35,21 +35,6 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
 
         public function init_form_fields()
         {
-            // $this->form_fields = array(
-            //     'base_url' => array(
-            //         'title' => __('Base URL', 'coopcycle'),
-            //         'type' => 'text',
-            //         'description' => __('The URL of the CoopCycle instance.', 'coopcycle'),
-            //         'default' => ''
-            //     ),
-            //     'token' => array(
-            //         'title' => __('Token', 'coopcycle'),
-            //         'type' => 'password',
-            //         'description' => __('The token to communicate with CoopCycle API.', 'coopcycle'),
-            //         'default' => ''
-            //     ),
-            // );
-
             $this->instance_form_fields = array(
                 'title' => array(
                     'title' => __( 'Title', 'coopcycle' ),
@@ -64,7 +49,6 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
         protected function init()
         {
             $this->init_form_fields();
-            // $this->init_settings();
 
             add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         }
@@ -100,7 +84,7 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
 
                 $rate = array(
                     'id' => $this->get_rate_id(),
-                    'label' => $this->title,
+                    'label' => $this->get_option('title'),
                     'cost' => number_format($cost / 100, 2),
                     'package' => $package,
                     // 'taxes' => '???',
