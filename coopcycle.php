@@ -5,6 +5,7 @@
  * Plugin URI: https://coopcycle.org/
  * Description: CoopCycle plugin for WordPress
  * Version: 0.4.0
+ * Domain Path: /i18n/languages/
  */
 
 require_once __DIR__ . '/src/HttpClient.php';
