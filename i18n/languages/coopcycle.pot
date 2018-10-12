@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CoopCycle Wordpress Plugin\n"
-"POT-Creation-Date: 2018-10-12 20:19+0200\n"
+"POT-Creation-Date: 2018-10-12 22:20+0200\n"
 "PO-Revision-Date: 2018-10-12 20:17+0200\n"
 "Last-Translator: \n"
 "Language-Team: dev@coopcycle.org\n"
@@ -16,24 +16,24 @@ msgstr ""
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: coopcycle.php:112
+#: coopcycle.php:115
 msgid "Shipping date"
 msgstr ""
 
-#: coopcycle.php:118
+#: coopcycle.php:121
 #, php-format
 msgid "The next shipping date is %s"
 msgstr ""
 
-#: coopcycle.php:120
+#: coopcycle.php:123
 msgid "Please choose your preferred time for shipping below"
 msgstr ""
 
-#: coopcycle.php:130
+#: coopcycle.php:133
 msgid "Shipping time"
 msgstr ""
 
-#: coopcycle.php:139
+#: coopcycle.php:142
 msgid "Please choose a shipping date."
 msgstr ""
 

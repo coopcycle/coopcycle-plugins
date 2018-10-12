@@ -112,7 +112,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         $nextShippingDateFormatted = date_i18n('l d F', $opens->getTimestamp());
 
         echo '<div id="my_custom_checkout_field">';
-        echo '<h3>' . __('Shipping date') . '</h3>';
+        echo '<h3>' . __('Shipping date', 'coopcycle') . '</h3>';
 
         // Customer cannot choose shipping date
         echo '<input type="hidden" name="order_shipping_date" id="order_shipping_date" value="' . $opens->format('Y-m-d') . '" />';
@@ -130,7 +130,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             'type'          => 'text',
             'required'      => true,
             'class'         => array('form-row-wide'),
-            'label'         => __('Shipping time'),
+            'label'         => __('Shipping time', 'coopcycle'),
         ), $checkout->get_value('order_shipping_time'));
 
         echo '</div>';
