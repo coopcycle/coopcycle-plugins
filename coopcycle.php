@@ -74,7 +74,10 @@ function coopcycle_next_shipping_date(\DateTime $now = null) {
     );
 }
 
-coopcycle_next_shipping_date();
+function coopcycle_load_plugin_textdomain() {
+    load_plugin_textdomain('coopcycle', false, basename(dirname( __FILE__ )) . '/i18n/languages/');
+}
+add_action('plugins_loaded', 'coopcycle_load_plugin_textdomain');
 
 /**
  * Check if WooCommerce is active
