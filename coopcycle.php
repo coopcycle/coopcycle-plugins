@@ -104,6 +104,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     function coopcycle_custom_checkout_field($checkout) {
 
+        // We display the custom field only if the shipping method was chosen
+        if (!in_array('coopcycle_shipping_method', wc_get_chosen_shipping_method_ids())) {
+            return;
+        }
+
         $nextShippingDate = coopcycle_next_shipping_date();
 
         $opens = $nextShippingDate['opens'];
