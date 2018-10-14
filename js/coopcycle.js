@@ -6,14 +6,21 @@ var moment = rome.moment;
 // Votre commande doit être passée avant le lundi minuit pour la livraison du mardi soir.
 // Votre commande doit être passée avant le mercredi minuit pour la livraison du vendredi soir.
 
-var el = document.querySelector('#order_shipping_time');
+var shippingDateEl = document.querySelector('#shipping_date');
+var shippingTimeEl = document.querySelector('#shipping_time');
 
-if (el) {
+if (shippingDateEl && shippingTimeEl) {
 
-    var opens = moment(document.querySelector('#order_shipping_date_opens').getAttribute('datetime'));
-    var closes = moment(document.querySelector('#order_shipping_date_closes').getAttribute('datetime'));
+    // TODO Make sure element has attribute
 
-    rome(el, {
+    var config = JSON.parse(shippingDateEl.getAttribute('data-shipping-time'));
+
+    var shippingDate = shippingDateEl.value;
+
+    var opens = moment(config[shippingDate]['opens']);
+    var closes = moment(config[shippingDate]['closes']);
+
+    rome(shippingTimeEl, {
         date: false,
         initialValue: opens,
         // Seconds between each option in the time dropdown
