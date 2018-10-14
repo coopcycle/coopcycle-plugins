@@ -16,7 +16,7 @@ if (is_admin()) {
     add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), array($settings_page, 'add_action_link'));
 }
 
-function coopcycle_next_shipping_date(\DateTime $now = null) {
+function coopcycle_shipping_dates(\DateTime $now = null) {
 
     if (null === $now) {
         $now = new \DateTime();
@@ -46,32 +46,40 @@ function coopcycle_next_shipping_date(\DateTime $now = null) {
     $candidates = array();
     $storage = new \SplObjectStorage();
     foreach ($openingHoursSpecification as $key => $openingHours) {
-        $date = new \DateTime(sprintf('next %s', strtolower($openingHours['dayOfWeek'])));
+
+        $date = clone $now;
+        $expression = sprintf('next %s', strtolower($openingHours['dayOfWeek']));
+        $date->modify($expression);
+
         $storage[$date] = $openingHours;
         $candidates[] = $date;
     }
 
     sort($candidates);
 
-    $next = current($candidates);
+    $shipping_dates = array();
+    foreach ($candidates as $shipping_date) {
 
-    $opens = clone $next;
-    $closes = clone $next;
+        $opening_hours = $storage[$shipping_date];
 
-    $openingHours = $storage[$next];
+        $pattern = '/([0-9]+):([0-9]+):([0-9]+)/';
 
-    $pattern = '/([0-9]+):([0-9]+):([0-9]+)/';
+        $opens = clone $shipping_date;
+        $closes = clone $shipping_date;
 
-    preg_match($pattern, $openingHours['opens'], $matches);
-    $opens->setTime($matches[1], $matches[2], $matches[3]);
+        preg_match($pattern, $opening_hours['opens'], $matches);
+        $opens->setTime($matches[1], $matches[2], $matches[3]);
 
-    preg_match($pattern, $openingHours['closes'], $matches);
-    $closes->setTime($matches[1], $matches[2], $matches[3]);
+        preg_match($pattern, $opening_hours['closes'], $matches);
+        $closes->setTime($matches[1], $matches[2], $matches[3]);
 
-    return array(
-        'opens' => $opens,
-        'closes' => $closes,
-    );
+        $shipping_dates[] = array(
+            'opens' => $opens,
+            'closes' => $closes,
+        );
+    }
+
+    return $shipping_dates;
 }
 
 function coopcycle_load_plugin_textdomain() {
@@ -150,17 +158,20 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      */
     function coopcycle_checkout_fields($fields) {
 
-        $next_shipping_date = coopcycle_next_shipping_date();
+        $shipping_dates = coopcycle_shipping_dates();
 
-        $opens = $next_shipping_date['opens'];
-        $closes = $next_shipping_date['closes'];
+        $shipping_date_options = array();
+        $shipping_times_by_shipping_date = array();
+        foreach ($shipping_dates as $shipping_date) {
+            $opens = $shipping_date['opens'];
+            $closes = $shipping_date['closes'];
 
-        $shipping_times_by_shipping_date = array(
-            $opens->format('Y-m-d') => array(
+            $shipping_date_options[$opens->format('Y-m-d')] = date_i18n('l d F', $opens->getTimestamp());
+            $shipping_times_by_shipping_date[$opens->format('Y-m-d')] = array(
                 'opens' => $opens->format('Y-m-d H:i:s'),
                 'closes' => $closes->format('Y-m-d H:i:s'),
-            )
-        );
+            );
+        }
 
         $fields['billing']['shipping_date'] = array(
             'type'      => 'select',
@@ -171,9 +182,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             'class'     => array('form-row-wide', 'form-row-hidden'),
             'clear'     => true,
             'priority'  => 120,
-            'options'   => array(
-                $opens->format('Y-m-d') => date_i18n('l d F', $opens->getTimestamp())
-            ),
+            'options'   => $shipping_date_options,
             'custom_attributes' => array(
                 'data-shipping-time' => json_encode($shipping_times_by_shipping_date)
             )
