@@ -251,6 +251,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
             $order = wc_get_order($order_id);
 
+            if (!$order->has_shipping_method('coopcycle_shipping_method')) {
+                return;
+            }
+
             $shipping_date = $order->get_meta('shipping_date', true);
             $shipping_time = $order->get_meta('shipping_time', true);
 
