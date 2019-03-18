@@ -7,7 +7,7 @@
     },
     {
       "@type": "OpeningHoursSpecification",
-      "dayOfWeek": "http://schema.org/Friday",
+      "dayOfWeek": "http://schema.org/Thursday",
       "opens":  "18:00:00",
       "closes":  "20:30:00"
     }
