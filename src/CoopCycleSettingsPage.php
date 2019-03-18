@@ -70,7 +70,12 @@ class CoopCycleSettingsPage
 
         register_setting(
             'coopcycle_woocommerce',
-            'coopcycle_api_token'
+            'coopcycle_api_key'
+        );
+
+        register_setting(
+            'coopcycle_woocommerce',
+            'coopcycle_api_secret'
         );
 
         add_settings_section(
@@ -89,9 +94,17 @@ class CoopCycleSettingsPage
         );
 
         add_settings_field(
-            'coopcycle_api_token',
-            'API Token',
-            array($this, 'coopcycle_api_token_callback'),
+            'coopcycle_api_key',
+            'API Key',
+            array($this, 'coopcycle_api_key_callback'),
+            'coopcycle-settings',
+            'coopcycle_woocommerce'
+        );
+
+        add_settings_field(
+            'coopcycle_api_secret',
+            'API Secret',
+            array($this, 'coopcycle_api_secret_callback'),
             'coopcycle-settings',
             'coopcycle_woocommerce'
         );
@@ -122,12 +135,22 @@ class CoopCycleSettingsPage
         <?php
     }
 
-    public function coopcycle_api_token_callback()
+    public function coopcycle_api_key_callback()
     {
-        $option = get_option('coopcycle_api_token');
+        $option = get_option('coopcycle_api_key');
 
         printf(
-            '<input class="regular-text" type="text" id="coopcycle_api_token" name="coopcycle_api_token" value="%s" />',
+            '<input class="regular-text" type="text" id="coopcycle_api_key" name="coopcycle_api_key" value="%s" />',
+            isset( $option ) ? esc_attr($option) : ''
+        );
+    }
+
+    public function coopcycle_api_secret_callback()
+    {
+        $option = get_option('coopcycle_api_secret');
+
+        printf(
+            '<input class="regular-text" type="text" id="coopcycle_api_secret" name="coopcycle_api_secret" value="%s" />',
             isset( $option ) ? esc_attr($option) : ''
         );
     }
