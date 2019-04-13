@@ -243,14 +243,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         $shipping_date = get_post_meta($post_id, 'shipping_date', true);
         $shipping_time = get_post_meta($post_id, 'shipping_time', true);
 
-        $shipping_timestamp = strtotime("{$shipping_date} {$shipping_time}");
+        $shipping_timestamp = false;
+        if ($shipping_date && $shipping_time) {
+            $shipping_timestamp = strtotime("{$shipping_date} {$shipping_time}");
+        }
 
         switch ($column) {
             case 'order_shipping_date':
-                echo date_i18n(get_option('date_format'), $shipping_timestamp);
+                if ($shipping_timestamp) {
+                    echo date_i18n(get_option('date_format'), $shipping_timestamp);
+                }
                 break;
             case 'order_shipping_time':
-                echo date_i18n('H:i', $shipping_timestamp);
+                if ($shipping_timestamp) {
+                    echo date_i18n('H:i', $shipping_timestamp);
+                }
                 break;
         }
     }
