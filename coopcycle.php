@@ -229,6 +229,34 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
     add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
 
+
+    /* Add custom columns to "shop_order" post list */
+
+    function coopcycle_manage_shop_order_posts_columns($columns) {
+        return array_merge($columns, array(
+            'order_shipping_date' => __('Shipping date', 'coopcycle'),
+            'order_shipping_time' => __('Shipping time', 'coopcycle')
+        ));
+    }
+    function coopcycle_manage_shop_order_posts_custom_column($column, $post_id) {
+
+        $shipping_date = get_post_meta($post_id, 'shipping_date', true);
+        $shipping_time = get_post_meta($post_id, 'shipping_time', true);
+
+        $shipping_timestamp = strtotime("{$shipping_date} {$shipping_time}");
+
+        switch ($column) {
+            case 'order_shipping_date':
+                echo date_i18n(get_option('date_format'), $shipping_timestamp);
+                break;
+            case 'order_shipping_time':
+                echo date_i18n('H:i', $shipping_timestamp);
+                break;
+        }
+    }
+    add_filter('manage_shop_order_posts_columns', 'coopcycle_manage_shop_order_posts_columns', 20);
+    add_action('manage_shop_order_posts_custom_column', 'coopcycle_manage_shop_order_posts_custom_column', 10, 2);
+
     function coopcycle_enqueue_scripts() {
 
         wp_register_style('rome', 'https://cdnjs.cloudflare.com/ajax/libs/rome/2.1.22/rome.min.css');
