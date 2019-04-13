@@ -8,6 +8,7 @@
  * Domain Path: /i18n/languages/
  */
 
+require_once __DIR__ . '/src/CoopCycle.php';
 require_once __DIR__ . '/src/HttpClient.php';
 
 if (is_admin()) {
@@ -109,7 +110,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         // TODO Make sure shipping time is valid
 
         // Skip if another shipping method was chosen
-        if (!in_array('coopcycle_shipping_method', wc_get_chosen_shipping_method_ids())) {
+        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
             return;
         }
 
@@ -121,7 +122,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     function coopcycle_checkout_update_order_meta($order_id) {
 
         // Skip if another shipping method was chosen
-        if (!in_array('coopcycle_shipping_method', wc_get_chosen_shipping_method_ids())) {
+        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
             return;
         }
 
@@ -209,8 +210,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      */
     function coopcycle_after_shipping_rate($method, $index) {
 
-        // If the shipping method is CoopCycle, show custom fields
-        if ($method->get_method_id() === 'coopcycle_shipping_method') {
+        // Show custom fields for accepted shipping methods
+        if (CoopCycle::accept_shipping_method($method->get_method_id())) {
             echo '<script>';
             echo 'document.querySelector("#shipping_date_time_heading").classList.remove("form-row-hidden");';
             echo 'document.querySelector("#shipping_date_field").classList.remove("form-row-hidden");';
@@ -251,7 +252,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
             $order = wc_get_order($order_id);
 
-            if (!$order->has_shipping_method('coopcycle_shipping_method')) {
+            if (!CoopCycle::accept_order($order)) {
                 return;
             }
 
