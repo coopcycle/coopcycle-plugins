@@ -59,6 +59,7 @@ class CoopCycleSettingsPage
      */
     public function page_init()
     {
+        // Settings need to be registered first
         register_setting(
             'coopcycle_woocommerce',
             'coopcycle_base_url',
@@ -67,15 +68,17 @@ class CoopCycleSettingsPage
                 'sanitize_callback' => array($this, 'normalize_base_url')
             )
         );
-
         register_setting(
             'coopcycle_woocommerce',
             'coopcycle_api_key'
         );
-
         register_setting(
             'coopcycle_woocommerce',
             'coopcycle_api_secret'
+        );
+        register_setting(
+            'coopcycle_woocommerce',
+            'coopcycle_free_shipping'
         );
 
         add_settings_section(
@@ -105,6 +108,14 @@ class CoopCycleSettingsPage
             'coopcycle_api_secret',
             'API Secret',
             array($this, 'coopcycle_api_secret_callback'),
+            'coopcycle-settings',
+            'coopcycle_woocommerce'
+        );
+
+        add_settings_field(
+            'coopcycle_free_shipping',
+            'Execute on free shipping',
+            array($this, 'coopcycle_free_shipping_callback'),
             'coopcycle-settings',
             'coopcycle_woocommerce'
         );
@@ -153,5 +164,11 @@ class CoopCycleSettingsPage
             '<input class="regular-text" type="text" id="coopcycle_api_secret" name="coopcycle_api_secret" value="%s" />',
             isset( $option ) ? esc_attr($option) : ''
         );
+    }
+
+    public function coopcycle_free_shipping_callback()
+    {
+        echo '<input type="checkbox" id="coopcycle_free_shipping" name="coopcycle_free_shipping" value="yes" '
+            . checked('yes', get_option('coopcycle_free_shipping'), false) . ' />';
     }
 }
