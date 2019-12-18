@@ -16,6 +16,8 @@ class CoopCycleSettingsPage
     {
         add_action('admin_menu', array($this, 'add_plugin_page'));
         add_action('admin_init', array($this, 'page_init'));
+
+        add_action('updated_option', array($this, 'updated_option'), 10, 3);
     }
 
     public function add_plugin_page()
@@ -206,5 +208,58 @@ class CoopCycleSettingsPage
     {
         echo '<input type="checkbox" id="coopcycle_free_shipping" name="coopcycle_free_shipping" value="yes" '
             . checked('yes', get_option('coopcycle_free_shipping'), false) . ' />';
+    }
+
+    public function updated_option($option_name, $old_value, $new_value)
+    {
+        if (in_array($option_name, array('coopcycle_base_url', 'coopcycle_api_key', 'coopcycle_api_secret'))) {
+
+            $base_url = get_option('coopcycle_base_url');
+            $api_key = get_option('coopcycle_api_key');
+            $api_secret = get_option('coopcycle_api_secret');
+
+            if ($base_url && $api_key && $api_secret) {
+
+                $response = wp_remote_get(sprintf('%s/api', $base_url), array(
+                    'timeout' => 30,
+                    'sslverify' => false,
+                    'headers' => array(
+                        'Content-Type' => 'application/json',
+                    ),
+                ));
+
+                $response_code = wp_remote_retrieve_response_code($response);
+                if (is_wp_error($response) || $response_code !== 200) {
+                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle'));
+                    return;
+                }
+
+                $body = wp_remote_retrieve_body($response);
+
+                $entrypoint = json_decode($body, true);
+
+                $entrypoint_valid = isset($entrypoint['@context']) && $entrypoint['@context'] === '/api/contexts/Entrypoint';
+
+                if (!$entrypoint_valid) {
+                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle'));
+                    return;
+                }
+
+                $response = wp_remote_post(sprintf('%s/oauth2/token', $base_url), array(
+                    'timeout' => 30,
+                    'sslverify' => false,
+                    'headers' => array(
+                        'Authorization' => sprintf('Basic %s', base64_encode(sprintf('%s:%s', $api_key, $api_secret)))
+                    ),
+                    'body' => 'grant_type=client_credentials&scope=deliveries',
+                ));
+
+                $response_code = wp_remote_retrieve_response_code($response);
+                if (is_wp_error($response) || $response_code !== 200) {
+                    add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API credentials are not valid'));
+                    return;
+                }
+            }
+        }
     }
 }
