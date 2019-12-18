@@ -82,16 +82,16 @@ class CoopCycle
                     continue;
                 }
 
-                $pattern = '/([0-9]+):([0-9]+):([0-9]+)/';
+                $pattern = '/^([0-9]+):([0-9]+):?([0-9]+)?/';
 
                 $opens = clone $cursor;
                 $closes = clone $cursor;
 
                 preg_match($pattern, $ohs['opens'], $matches);
-                $opens->setTime($matches[1], $matches[2], $matches[3]);
+                $opens->setTime($matches[1], $matches[2]);
 
                 preg_match($pattern, $ohs['closes'], $matches);
-                $closes->setTime($matches[1], $matches[2], $matches[3]);
+                $closes->setTime($matches[1], $matches[2]);
 
                 $range = new \DatePeriod($opens, $closes->diff($opens), $closes);
 
