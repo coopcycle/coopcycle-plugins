@@ -66,8 +66,17 @@ class Coopcycle extends CarrierModule
             return new Carrier($id, $this->context->language->id);
         }
 
+        $settings = $this->httpRequest('GET', '/api/settings', array(
+            'headers' => array(
+                'Accept: application/json',
+                'Content-Type: application/json',
+            ),
+        ));
+
+        $brandName = $settings['brand_name'];
+
         $carrier = new Carrier();
-        $carrier->name = 'CoopCycle';
+        $carrier->name = $brandName;
         $carrier->active = true;
         $carrier->shipping_handling = false;
         $carrier->need_range = true;
@@ -76,7 +85,10 @@ class Coopcycle extends CarrierModule
         $carrier->is_module = true;
         $carrier->external_module_name = $this->name;
         $carrier->delay = array(
-            Configuration::get('PS_LANG_DEFAULT') => $this->trans('A few hours', [], 'Modules.CoopCycle.Admin')
+            Language::getIdByIso('en') =>
+                $this->trans('Delivery by bike with %brand_name%', array('%brand_name%' => $brandName), 'Modules.CoopCycle.Admin'),
+            Language::getIdByIso('fr') =>
+                $this->trans('Livraison en vélo avec %brand_name%', array('%brand_name%' => $brandName), 'Modules.CoopCycle.Admin'),
         );
 
         if (!$carrier->add()) {
