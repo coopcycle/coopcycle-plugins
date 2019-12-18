@@ -65,16 +65,24 @@ class CoopCycleSettingsPage
             'coopcycle_base_url',
             array(
                 'type' => 'string',
-                'sanitize_callback' => array($this, 'normalize_base_url')
+                'sanitize_callback' => array($this, 'sanitize_base_url')
             )
         );
         register_setting(
             'coopcycle_woocommerce',
-            'coopcycle_api_key'
+            'coopcycle_api_key',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => array($this, 'sanitize_api_key')
+            )
         );
         register_setting(
             'coopcycle_woocommerce',
-            'coopcycle_api_secret'
+            'coopcycle_api_secret',
+            array(
+                'type' => 'string',
+                'sanitize_callback' => array($this, 'sanitize_api_secret')
+            )
         );
         register_setting(
             'coopcycle_woocommerce',
@@ -125,8 +133,14 @@ class CoopCycleSettingsPage
     {
     }
 
-    public function normalize_base_url($base_url)
+    public function sanitize_base_url($base_url)
     {
+        $base_url = trim($base_url);
+
+        if (empty($base_url)) {
+            add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Base URL is empty'));
+        }
+
         if (0 === preg_match('#^https?://#', $base_url)) {
             $base_url = 'http://' . $base_url;
         }
@@ -134,6 +148,28 @@ class CoopCycleSettingsPage
         // TODO Guess http / https
 
         return $base_url;
+    }
+
+    public function sanitize_api_key($api_key)
+    {
+        $api_key = trim($api_key);
+
+        if (empty($api_key)) {
+            add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API key is empty'));
+        }
+
+        return $api_key;
+    }
+
+    public function sanitize_api_secret($api_secret)
+    {
+        $api_secret = trim($api_secret);
+
+        if (empty($api_secret)) {
+            add_settings_error('coopcycle_api_secret', 'coopcycle_api_secret', __('API secret is empty'));
+        }
+
+        return $api_secret;
     }
 
     public function coopcycle_base_url_callback()
