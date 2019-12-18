@@ -7,6 +7,7 @@ class CoopCycle_HttpClient
     private $base_url;
     private $api_key;
     private $api_secret;
+    private $last_access_token;
 
     public function __construct()
     {
@@ -77,28 +78,33 @@ class CoopCycle_HttpClient
 
     public function accessToken()
     {
-        $url = $this->base_url . '/oauth2/token';
+        if (empty($this->last_access_token)) {
 
-        $headers = array(
-            'Authorization' => sprintf('Basic %s', base64_encode(sprintf('%s:%s', $this->api_key, $this->api_secret)))
-        );
+            $url = $this->base_url . '/oauth2/token';
 
-        $response = wp_remote_post($url, array(
-            'timeout' => 30,
-            'sslverify' => false,
-            'headers' => $headers,
-            'body' => 'grant_type=client_credentials&scope=deliveries',
-        ));
+            $headers = array(
+                'Authorization' => sprintf('Basic %s', base64_encode(sprintf('%s:%s', $this->api_key, $this->api_secret)))
+            );
 
-        $response_code = wp_remote_retrieve_response_code($response);
-        if (is_wp_error($response) || !$this->is_successful($response_code)) {
-            throw new HttpClientException($response);
+            $response = wp_remote_post($url, array(
+                'timeout' => 30,
+                'sslverify' => false,
+                'headers' => $headers,
+                'body' => 'grant_type=client_credentials&scope=deliveries',
+            ));
+
+            $response_code = wp_remote_retrieve_response_code($response);
+            if (is_wp_error($response) || !$this->is_successful($response_code)) {
+                throw new HttpClientException($response);
+            }
+
+            $body = wp_remote_retrieve_body($response);
+
+            $data = json_decode($body, true);
+
+            $this->last_access_token = $data['access_token'];
         }
 
-        $body = wp_remote_retrieve_body($response);
-
-        $data = json_decode($body, true);
-
-        return $data['access_token'];
+        return $this->last_access_token;
     }
 }
