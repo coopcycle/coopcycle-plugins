@@ -1,0 +1,13 @@
+{
+    "name": "coopcycle/coopcycle-plugins",
+    "authors": [
+        {
+            "name": "CoopCycle",
+            "email": "dev@coopcycle.org"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    }
+}
