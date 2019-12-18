@@ -1,0 +1,63 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoopCycle Wordpress Plugin\n"
+"POT-Creation-Date: 2018-10-12 22:20+0200\n"
+"PO-Revision-Date: 2018-10-12 20:17+0200\n"
+"Last-Translator: \n"
+"Language-Team: dev@coopcycle.org\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2\n"
+"X-Poedit-Basepath: ../..\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: coopcycle.php:115
+msgid "Shipping date"
+msgstr ""
+
+#: coopcycle.php:121
+#, php-format
+msgid "The next shipping date is %s"
+msgstr ""
+
+#: coopcycle.php:123
+msgid "Please choose your preferred time for shipping below"
+msgstr ""
+
+#: coopcycle.php:133
+msgid "Shipping time"
+msgstr ""
+
+#: coopcycle.php:142
+msgid "Please choose a shipping date."
+msgstr ""
+
+#: src/CoopCycleSettingsPage.php:35
+msgid "Settings"
+msgstr ""
+
+#: src/ShippingMethod.php:16 src/ShippingMethod.php:17
+#: src/ShippingMethod.php:43
+msgid "CoopCycle"
+msgstr ""
+
+#: src/ShippingMethod.php:18
+msgid "Allow customers to get delivered by a local coop running CoopCycle"
+msgstr ""
+
+#: src/ShippingMethod.php:40
+msgid "Title"
+msgstr ""
+
+#: src/ShippingMethod.php:42
+msgid "This controls the title which the user sees during checkout."
+msgstr ""
+
+#: theme/functions.php:37
+msgid "Ajouter au panier"
+msgstr ""
