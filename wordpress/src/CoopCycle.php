@@ -50,4 +50,66 @@ class CoopCycle
 
         return false;
     }
+
+    private static function count_number_of_days(array $ranges)
+    {
+        $iso_days = array_map(function (\DatePeriod $range) {
+            return $range->getStartDate()->format('Y-m-d');
+        }, $ranges);
+
+        $iso_days = array_values(array_unique($iso_days));
+
+        return count($iso_days);
+    }
+
+    public static function time_slot_to_date_periods($time_slot, \DateTime $now = null)
+    {
+        if (null === $now) {
+            $now = new \DateTime();
+        }
+
+        $number_of_days = 0;
+        $expected_number_of_days = 2;
+
+        $cursor = clone $now;
+
+        $ranges = array();
+        while ($number_of_days < $expected_number_of_days) {
+
+            foreach ($time_slot['openingHoursSpecification'] as $ohs) {
+
+                if (!in_array($cursor->format('l'), $ohs['dayOfWeek'])) {
+                    continue;
+                }
+
+                $pattern = '/([0-9]+):([0-9]+):([0-9]+)/';
+
+                $opens = clone $cursor;
+                $closes = clone $cursor;
+
+                preg_match($pattern, $ohs['opens'], $matches);
+                $opens->setTime($matches[1], $matches[2], $matches[3]);
+
+                preg_match($pattern, $ohs['closes'], $matches);
+                $closes->setTime($matches[1], $matches[2], $matches[3]);
+
+                $range = new \DatePeriod($opens, $closes->diff($opens), $closes);
+
+                if ($range->getStartDate() > $now) {
+                    $ranges[] = $range;
+                }
+            }
+
+            $cursor->modify('+1 day');
+
+            $number_of_days = self::count_number_of_days($ranges);
+        }
+
+        uasort($ranges, function (\DatePeriod $a, \DatePeriod $b) {
+            if ($a->getStartDate() === $b->getStartDate()) return 0;
+            return $a->getStartDate() < $b->getStartDate() ? -1 : 1;
+        });
+
+        return $ranges;
+    }
 }
