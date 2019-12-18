@@ -86,6 +86,13 @@ services:
         echo "Importing WooCommerce sample products…"
         wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
 
+        if ! $$(wp plugin is-active coopcycle); then
+          echo "Activating CoopCycle…"
+          wp plugin activate coopcycle
+        else
+          echo "CoopCycle is activated"
+        fi
+
 volumes:
   wordpress_dbdata:
   wordpress:
