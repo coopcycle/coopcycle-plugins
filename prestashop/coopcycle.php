@@ -43,6 +43,20 @@ class Coopcycle extends CarrierModule
         return true;
     }
 
+    public function uninstall()
+    {
+        if (!parent::uninstall()) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('updateCarrier')) {
+            return false;
+        }
+
+        // TODO Delete carrier
+
+        return true;
+    }
 
     protected function createCarrier()
     {
@@ -72,15 +86,6 @@ class Coopcycle extends CarrierModule
         Configuration::updateValue(self::CONFIG_PREFIX . 'CARRIER_ID', $carrier->id);
 
         return $carrier;
-    }
-
-    public function uninstall()
-    {
-        if (!parent::uninstall()) {
-            return false;
-        }
-
-        return true;
     }
 
     private function accessToken()
