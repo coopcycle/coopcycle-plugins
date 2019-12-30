@@ -242,10 +242,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                     'address' => array(
                         'streetAddress' => $street_address,
                         'telephone' => get_user_meta($order->get_customer_id(), 'billing_phone', true),
+                        'contactName' => $contact_name,
                     ),
                     'timeSlot' => $shipping_date,
                     'comments' => $order->get_customer_note(),
-                    'contactName' => $contact_name,
                 )
             );
 
