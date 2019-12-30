@@ -224,16 +224,28 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             // )
             $shipping_address = $order->get_address('shipping');
 
+            $street_address = sprintf('%s %s %s',
+                $shipping_address['address_1'],
+                $shipping_address['postcode'],
+                $shipping_address['city']
+            );
+
+            $contact_name = implode(' ', array_filter(array(
+                $shipping_address['first_name'],
+                $shipping_address['last_name']
+            )));
+
             $data = array(
                 // We only specify the dropoff data
                 // Pickup is fully implicit
                 'dropoff' => array(
-                    'address' => sprintf('%s %s %s',
-                        $shipping_address['address_1'],
-                        $shipping_address['postcode'],
-                        $shipping_address['city']
+                    'address' => array(
+                        'streetAddress' => $street_address,
+                        'telephone' => get_user_meta($order->get_customer_id(), 'billing_phone', true),
                     ),
                     'timeSlot' => $shipping_date,
+                    'comments' => $order->get_customer_note(),
+                    'contactName' => $contact_name,
                 )
             );
 
