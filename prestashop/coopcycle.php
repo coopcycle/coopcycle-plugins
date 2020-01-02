@@ -10,6 +10,7 @@ require_once dirname(__FILE__).'/classes/CartTimeSlot.php';
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=51184686
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=15171738
  * @see https://stackoverflow.com/questions/28408612/prestashop-change-order-status-when-payment-is-validated
+ * @see https://github.com/PrestaEdit/Canvas-Module-Prestashop-15
  */
 class Coopcycle extends CarrierModule
 {
@@ -127,6 +128,9 @@ class Coopcycle extends CarrierModule
         return $carrier;
     }
 
+    /**
+     * @return string
+     */
     private function accessToken()
     {
         // TODO Check if API_KEY & API_SECRET is set
@@ -181,6 +185,9 @@ class Coopcycle extends CarrierModule
 
         if (isset($config['body']) && is_array($config['body'])) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($config['body']));
+        }
+        if (isset($config['body_json']) && is_array($config['body_json'])) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($config['body_json']));
         }
 
         $res = curl_exec($ch);
@@ -510,43 +517,58 @@ class Coopcycle extends CarrierModule
      */
     public function hookActionOrderStatusPostUpdate($params)
     {
-        if ($params['newOrderStatus'] === Configuration::get('PS_OS_PAYMENT')) {
+        if ((int) $params['newOrderStatus']->id === (int) Configuration::get('PS_OS_PAYMENT')) {
+
             $order = new Order((int) $params['id_order'], $this->context->language->id);
-            if (Validate::isLoadedObject($order)) {
-                if (!$accessToken = $this->accessToken()) {
-                    return;
-                }
 
-                $address = new Address($order->id_address_delivery, $this->context->language->id);
-
-                $street_address = implode(' ', array(
-                    $address->address1,
-                    $address->address2,
-                    $address->postcode,
-                    $address->city,
-                ));
-
-                $payload = array(
-                    'dropoff' => array(
-                        'address' => array(
-                            'streetAddress' => $street_address,
-                            'description' => $address->other,
-                            // 'telephone' => $address->phone_mobile,
-                            // 'contactName' => $contact_name,
-                        ),
-                        // 'timeSlot' => $shipping_date,
-                        // 'comments' => $order->get_customer_note(),
-                    )
-                );
-
-                $delivery = $this->httpRequest('POST', '/api/deliveries', array(
-                    'headers' => array(
-                        sprintf('Authorization: Bearer %s', $accessToken),
-                        'Accept: application/json',
-                        'Content-Type: application/json',
-                    ),
-                ));
+            if (!Validate::isLoadedObject($order)) {
+                return;
             }
+
+            if ((int) $order->id_carrier !== (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
+                return;
+            }
+
+            $cart_time_slot = new CoopCycleCartTimeSlot($order->id_cart);
+            if (!Validate::isLoadedObject($cart_time_slot)) {
+                return;
+            }
+
+            if (!$accessToken = $this->accessToken()) {
+                return;
+            }
+
+            $address = new Address((int) $order->id_address_delivery, $this->context->language->id);
+
+            $street_address = implode(' ', array(
+                $address->address1,
+                $address->postcode,
+                $address->city,
+            ));
+
+            $payload = array(
+                'dropoff' => array(
+                    'address' => array(
+                        'streetAddress' => $street_address,
+                        'description' => $address->other,
+                        'contactName' => trim(implode(' ', array($address->firstname, $address->lastname))),
+                    ),
+                    'timeSlot' => $cart_time_slot->time_slot,
+                )
+            );
+
+            if ($address->phone || $address->phone_mobile) {
+                $payload['dropoff']['address']['telephone'] = $address->phone ? $address->phone : $address->phone_mobile;
+            }
+
+            $delivery = $this->httpRequest('POST', '/api/deliveries', array(
+                'body_json' => $payload,
+                'headers' => array(
+                    sprintf('Authorization: Bearer %s', $accessToken),
+                    'Accept: application/ld+json',
+                    'Content-Type: application/ld+json',
+                ),
+            ));
         }
     }
 }
