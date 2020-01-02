@@ -7,6 +7,7 @@ if (!defined('_PS_VERSION_'))
  * @see https://belvg.com/blog/how-to-create-shipping-module-for-prestashop.html
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=51184686
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=15171738
+ * @see https://stackoverflow.com/questions/28408612/prestashop-change-order-status-when-payment-is-validated
  */
 class Coopcycle extends CarrierModule
 {
@@ -40,6 +41,10 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
+        if (!$this->registerHook('displayCarrierExtraContent')) {
+            return false;
+        }
+
         return true;
     }
 
@@ -50,6 +55,10 @@ class Coopcycle extends CarrierModule
         }
 
         if (!$this->unregisterHook('updateCarrier')) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('displayCarrierExtraContent')) {
             return false;
         }
 
@@ -110,7 +119,7 @@ class Coopcycle extends CarrierModule
 
         $authorization = base64_encode(sprintf('%s:%s', $apiKey, $apiSecret));
 
-        return $this->httpRequest('POST', '/oauth2/token', array(
+        $response = $this->httpRequest('POST', '/oauth2/token', array(
             'body' => array(
                 'grant_type' => 'client_credentials',
                 'scope' => 'deliveries',
@@ -119,6 +128,12 @@ class Coopcycle extends CarrierModule
                 sprintf('Authorization: Basic %s', $authorization),
             ),
         ));
+
+        if ($response) {
+            return $response['access_token'];
+        }
+
+        return false;
     }
 
     private function httpRequest($method, $uri, $config = array())
@@ -293,10 +308,214 @@ class Coopcycle extends CarrierModule
         return 10;
     }
 
+    private static function countNumberOfDays(array $ranges)
+    {
+        $iso_days = array_map(function (\DatePeriod $range) {
+            return $range->getStartDate()->format('Y-m-d');
+        }, $ranges);
+
+        $iso_days = array_values(array_unique($iso_days));
+
+        return count($iso_days);
+    }
+
+    public static function timeSlotToDatePeriods($time_slot, \DateTime $now = null)
+    {
+        if (null === $now) {
+            $now = new \DateTime();
+        }
+
+        $number_of_days = 0;
+        $expected_number_of_days = 2;
+
+        $cursor = clone $now;
+
+        $ranges = array();
+        while ($number_of_days < $expected_number_of_days) {
+
+            foreach ($time_slot['openingHoursSpecification'] as $ohs) {
+
+                if (!in_array($cursor->format('l'), $ohs['dayOfWeek'])) {
+                    continue;
+                }
+
+                $pattern = '/^([0-9]+):([0-9]+):?([0-9]+)?/';
+
+                $opens = clone $cursor;
+                $closes = clone $cursor;
+
+                preg_match($pattern, $ohs['opens'], $matches);
+                $opens->setTime($matches[1], $matches[2]);
+
+                preg_match($pattern, $ohs['closes'], $matches);
+                $closes->setTime($matches[1], $matches[2]);
+
+                $range = new \DatePeriod($opens, $closes->diff($opens), $closes);
+
+                if ($range->getStartDate() > $now) {
+                    $ranges[] = $range;
+                }
+            }
+
+            $cursor->modify('+1 day');
+
+            $number_of_days = self::countNumberOfDays($ranges);
+        }
+
+        uasort($ranges, function (\DatePeriod $a, \DatePeriod $b) {
+            if ($a->getStartDate() === $b->getStartDate()) return 0;
+            return $a->getStartDate() < $b->getStartDate() ? -1 : 1;
+        });
+
+        return $ranges;
+    }
+
     public function hookActionCarrierUpdate($params)
     {
         if ((int) $params['id_carrier'] === (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
             Configuration::updateValue(self::CONFIG_PREFIX . 'CARRIER_ID', $params['carrier']->id);
+        }
+    }
+
+    public function hookDisplayCarrierExtraContent($params)
+    {
+        if (!$accessToken = $this->accessToken()) {
+            return;
+        }
+
+        $headers = array(
+            'Accept: application/json',
+            'Content-Type: application/json',
+            sprintf('Authorization: Bearer %s', $accessToken),
+        );
+
+        $me = $this->httpRequest('GET', '/api/me', array(
+            'headers' => $headers,
+        ));
+
+        if ($me) {
+            $store = $this->httpRequest('GET', $me['store'], array(
+                'headers' => $headers,
+            ));
+            if ($store) {
+                $time_slot = $this->httpRequest('GET', $store['timeSlot'], array(
+                    'headers' => $headers,
+                ));
+                if ($time_slot) {
+
+                    $date_periods = self::timeSlotToDatePeriods($time_slot);
+
+                    $options = array();
+                    foreach ($date_periods as $date_period) {
+                        $value = sprintf('%s %s-%s',
+                            $date_period->getStartDate()->format('Y-m-d'),
+                            $date_period->getStartDate()->format('H:i'),
+                            $date_period->getEndDate()->format('H:i')
+                        );
+                        $label = sprintf('%s between %s and %s',
+                            $date_period->getStartDate()->format('Y-m-d'),
+                            $date_period->getStartDate()->format('H:i'),
+                            $date_period->getEndDate()->format('H:i')
+                        );
+                        $options[$value] = $label;
+                    }
+
+                    $output = '<select name="coopcycle_time_slot">';
+                    foreach ($options as $value => $label) {
+                        $output .= sprintf('<option value="%s">%s</option>', $value, $label);
+                    }
+                    $output .= '<select>';
+
+                    return $output;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * @see https://www.prestashop.com/forums/topic/241470-adding-a-custom-field-during-the-checkout-process/
+     * @see https://www.prestashop.com/forums/topic/319917-how-to-add-custom-fields-in-checkout/
+     */
+    public function hookActionCarrierProcess($params)
+    {
+        $cart = $params['cart'];
+
+        if (!($cart instanceof Cart)) {
+            return;
+        }
+
+        if (!Tools::isSubmit('confirmDeliveryOption')) {
+            return;
+        }
+
+        if (!$time_slot = Tools::getValue('coopcycle_time_slot')) {
+            return
+        }
+
+        // TODO Store time slot in cart
+    }
+
+    /**
+     * array(
+     *   'cart' => $this->context->cart,
+     *   'order' => $order,
+     *   'customer' => $this->context->customer,
+     *   'currency' => $this->context->currency,
+     *   'orderStatus' => $order_status,
+     * )
+     */
+    // public function hookActionValidateOrder($params)
+    // {
+    // }
+
+    /**
+     * @see OrderHistory::changeIdOrderState()
+     * @param array $params array(
+     *  'newOrderStatus' => (object) OrderState,
+     *  'id_order' => (int) Order ID
+     * )
+     */
+    public function hookActionOrderStatusPostUpdate($params)
+    {
+        if ($params['newOrderStatus'] === Configuration::get('PS_OS_PAYMENT')) {
+            $order = new Order((int) $params['id_order'], $this->context->language->id);
+            if (Validate::isLoadedObject($order)) {
+                if (!$accessToken = $this->accessToken()) {
+                    return;
+                }
+
+                $address = new Address($order->id_address_delivery, $this->context->language->id);
+
+                $street_address = implode(' ', array(
+                    $address->address1,
+                    $address->address2,
+                    $address->postcode,
+                    $address->city,
+                ));
+
+                $payload = array(
+                    'dropoff' => array(
+                        'address' => array(
+                            'streetAddress' => $street_address,
+                            'description' => $address->other,
+                            // 'telephone' => $address->phone_mobile,
+                            // 'contactName' => $contact_name,
+                        ),
+                        // 'timeSlot' => $shipping_date,
+                        // 'comments' => $order->get_customer_note(),
+                    )
+                );
+
+                $delivery = $this->httpRequest('POST', '/api/deliveries', array(
+                    'headers' => array(
+                        sprintf('Authorization: Bearer %s', $accessToken),
+                        'Accept: application/json',
+                        'Content-Type: application/json',
+                    ),
+                ));
+            }
         }
     }
 }
