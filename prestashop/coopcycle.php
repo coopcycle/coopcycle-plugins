@@ -3,6 +3,8 @@
 if (!defined('_PS_VERSION_'))
   exit;
 
+require_once dirname(__FILE__).'/classes/CartTimeSlot.php';
+
 /**
  * @see https://belvg.com/blog/how-to-create-shipping-module-for-prestashop.html
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=51184686
@@ -37,12 +39,28 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
+        if (!$this->installDb()) {
+            return false;
+        }
+
         if (!$this->registerHook('updateCarrier')) {
             return false;
         }
 
         if (!$this->registerHook('displayCarrierExtraContent')) {
             return false;
+        }
+
+        return true;
+    }
+
+    public function installDb()
+    {
+        $sql = include dirname(__FILE__).'/sql_install.php';
+        foreach ($sql as $s) {
+            if (!Db::getInstance()->execute($s)) {
+                return false;
+            }
         }
 
         return true;
@@ -383,6 +401,12 @@ class Coopcycle extends CarrierModule
             return;
         }
 
+        $cart_time_slot = new CoopCycleCartTimeSlot($this->context->cart->id);
+        $current_value = null;
+        if (Validate::isLoadedObject($cart_time_slot)) {
+            $current_value = $cart_time_slot->time_slot;
+        }
+
         $headers = array(
             'Accept: application/json',
             'Content-Type: application/json',
@@ -422,7 +446,11 @@ class Coopcycle extends CarrierModule
 
                     $output = '<select name="coopcycle_time_slot">';
                     foreach ($options as $value => $label) {
-                        $output .= sprintf('<option value="%s">%s</option>', $value, $label);
+                        $selected = '';
+                        if ($current_value && $value === $current_value) {
+                            $selected = ' selected';
+                        }
+                        $output .= sprintf('<option value="%s"%s>%s</option>', $value, $selected, $label);
                     }
                     $output .= '<select>';
 
@@ -451,10 +479,13 @@ class Coopcycle extends CarrierModule
         }
 
         if (!$time_slot = Tools::getValue('coopcycle_time_slot')) {
-            return
+            return;
         }
 
-        // TODO Store time slot in cart
+        $cart_time_slot = new CoopCycleCartTimeSlot($cart->id);
+        $cart_time_slot->time_slot = $time_slot;
+
+        $cart_time_slot->save();
     }
 
     /**
