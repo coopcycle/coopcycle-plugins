@@ -107,13 +107,19 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $options_with_defaults[$key] = $value;
         }
 
+        $is_hidden = !CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids());
+        $css_class = array('form-row-wide');
+        if ($is_hidden) {
+            $css_class[] = 'form-row-hidden';
+        }
+
         $fields['billing']['shipping_date'] = array(
             'type'      => 'select',
             'label'     => __('Shipping date', 'coopcycle'),
             'required'  => true,
             // Field is hidden by default, it will be shown via JavaScript
             // @see coopcycle_after_shipping_rate
-            'class'     => array('form-row-wide', 'form-row-hidden'),
+            'class'     => $css_class,
             'clear'     => true,
             'priority'  => 120,
             'options'   => $options_with_defaults,
@@ -133,16 +139,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         if (CoopCycle::accept_shipping_method($method->get_method_id())) {
             echo "<script>\n";
             echo "(function () {\n";
+
             echo "  var input = document.querySelector('#shipping_date_field');\n";
             echo "  var heading = document.querySelector('#shipping_date_time_heading');\n";
-            echo "  var isChecked = document.querySelector('#shipping_method input[type=\"radio\"][value=\"{$method->id}\"]:checked');\n";
-            echo "  if (isChecked) {\n";
+
+            echo "  var hiddenField = document.querySelector('#shipping_method input[type=\"hidden\"][value=\"{$method->id}\"]');\n";
+            echo "  var radioButton = document.querySelector('#shipping_method input[type=\"radio\"][value=\"{$method->id}\"]');\n";
+
+            echo "  if (hiddenField || (radioButton && radioButton.checked)) {\n";
             echo "    input && input.classList.remove('form-row-hidden');\n";
             echo "    heading && heading.classList.remove('form-row-hidden');\n";
             echo "  } else {\n";
             echo "    input && input.classList.add('form-row-hidden');\n";
             echo "    heading && heading.classList.add('form-row-hidden');\n";
             echo "  }\n";
+
             echo "})();\n";
             echo '</script>';
         }
