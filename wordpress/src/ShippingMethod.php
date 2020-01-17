@@ -8,6 +8,8 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
 
     class CoopCycle_ShippingMethod extends WC_Shipping_Method {
 
+        private $http_client;
+
         public function __construct($instance_id = 0)
         {
             parent::__construct($instance_id);
@@ -31,6 +33,8 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
             $this->enabled = "yes";
 
             $this->init();
+
+            $this->http_client = CoopCycle::http_client();
         }
 
         public static function instance() {
@@ -68,18 +72,16 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
 
         public function get_shipping_date_options()
         {
-            $http_client = new CoopCycle_HttpClient();
-
             $options = array();
 
             try {
 
-                $me = $http_client->get('/api/me');
-                $store = $http_client->get($me['store']);
+                $me = $this->http_client->get('/api/me');
+                $store = $this->http_client->get($me['store']);
 
                 if (isset($store['timeSlot'])) {
 
-                    $time_slot = $http_client->get($store['timeSlot']);
+                    $time_slot = $this->http_client->get($store['timeSlot']);
 
                     $date_periods = CoopCycle::time_slot_to_date_periods($time_slot);
                     foreach ($date_periods as $date_period) {
@@ -133,13 +135,11 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
                 )),
             ];
 
-            $httpClient = new CoopCycle_HttpClient();
-
             $uri = sprintf('/api/pricing/calculate-price?%s', http_build_query($params));
 
             try {
 
-                $cost = $httpClient->get($uri);
+                $cost = $this->http_client->get($uri);
 
                 if ($cost) {
 

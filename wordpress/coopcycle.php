@@ -248,11 +248,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 )
             );
 
-            $httpClient = new CoopCycle_HttpClient();
+            $http_client = CoopCycle::http_client();
 
             try {
 
-                $delivery = $httpClient->post('/api/deliveries', $data);
+                $delivery = $http_client->post('/api/deliveries', $data);
 
                 // Save task id in order meta
                 $order->update_meta_data('task_id', $delivery['dropoff']['id']);
