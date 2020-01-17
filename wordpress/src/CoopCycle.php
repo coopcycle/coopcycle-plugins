@@ -2,6 +2,17 @@
 
 class CoopCycle
 {
+    private static $http_client;
+
+    public static function http_client()
+    {
+        if (!self::$http_client) {
+            self::$http_client = new CoopCycle_HttpClient();
+        }
+
+        return self::$http_client;
+    }
+
     public static function get_accepted_shipping_methods()
     {
         $shipping_methods = [
