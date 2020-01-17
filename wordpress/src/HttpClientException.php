@@ -16,6 +16,6 @@ class HttpClientException extends \RuntimeException
             }
         }
 
-        parent::__construct($message, $status);
+        parent::__construct($message, (int) $status);
     }
 }

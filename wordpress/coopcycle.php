@@ -48,7 +48,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             return;
         }
 
-        if (!$_POST['shipping_date']) {
+        if (!$_POST['shipping_date'] || empty($_POST['shipping_date'])) {
             wc_add_notice(__('Please choose a shipping date.', 'coopcycle'), 'error');
         }
     }
@@ -90,11 +90,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      */
     function coopcycle_checkout_fields($fields) {
 
+        if (!class_exists('CoopCycle_ShippingMethod')) {
+            return $fields;
+        }
+
         $shipping_method = CoopCycle_ShippingMethod::instance();
         $options = $shipping_method->get_shipping_date_options();
 
         if (!$options) {
             return $fields;
+        }
+
+        // Add an empty option at the beginning
+        $options_with_defaults = array('' => '');
+        foreach ($options as $key => $value) {
+            $options_with_defaults[$key] = $value;
         }
 
         $fields['billing']['shipping_date'] = array(
@@ -106,7 +116,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             'class'     => array('form-row-wide', 'form-row-hidden'),
             'clear'     => true,
             'priority'  => 120,
-            'options'   => $options,
+            'options'   => $options_with_defaults,
         );
 
         return $fields;
