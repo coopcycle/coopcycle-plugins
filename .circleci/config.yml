@@ -57,6 +57,14 @@ jobs:
             --newsletter=0
             --send_email=0
             --ssl=0
+      # https://devdocs.prestashop.com/1.7/modules/concepts/commands/
+      - run:
+          name: Install CoopCycle module
+          command: |
+            mv ./prestashop /var/www/html/modules/coopcycle
+            ls -l /var/www/html/modules/
+            cd /var/www/html
+            php bin/console prestashop:module install coopcycle
 
 workflows:
   version: 2
