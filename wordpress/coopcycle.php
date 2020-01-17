@@ -17,44 +17,6 @@ if (is_admin()) {
     add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), array($settings_page, 'add_action_link'));
 }
 
-function coopcycle_shipping_date_options() {
-
-    $http_client = new CoopCycle_HttpClient();
-
-    $options = array();
-
-    try {
-
-        $me = $http_client->get('/api/me');
-        $store = $http_client->get($me['store']);
-
-        if (isset($store['timeSlot'])) {
-
-            $time_slot = $http_client->get($store['timeSlot']);
-
-            $date_periods = CoopCycle::time_slot_to_date_periods($time_slot);
-            foreach ($date_periods as $date_period) {
-                $value = sprintf('%s %s-%s',
-                    $date_period->getStartDate()->format('Y-m-d'),
-                    $date_period->getStartDate()->format('H:i'),
-                    $date_period->getEndDate()->format('H:i')
-                );
-                $label = sprintf(__('%s between %s and %s'),
-                    date_i18n('l d F', $date_period->getStartDate()->getTimestamp()),
-                    $date_period->getStartDate()->format('H:i'),
-                    $date_period->getEndDate()->format('H:i')
-                );
-                $options[$value] = $label;
-            }
-        }
-
-    } catch (\Exception $e) {
-        // var_dump($e->getMessage());
-    }
-
-    return $options;
-}
-
 function coopcycle_load_plugin_textdomain() {
     load_plugin_textdomain('coopcycle', false, basename(dirname( __FILE__ )) . '/i18n/languages/');
 }
@@ -127,6 +89,14 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      * @see https://docs.woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/
      */
     function coopcycle_checkout_fields($fields) {
+
+        $shipping_method = CoopCycle_ShippingMethod::instance();
+        $options = $shipping_method->get_shipping_date_options();
+
+        if (!$options) {
+            return $fields;
+        }
+
         $fields['billing']['shipping_date'] = array(
             'type'      => 'select',
             'label'     => __('Shipping date', 'coopcycle'),
@@ -136,7 +106,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             'class'     => array('form-row-wide', 'form-row-hidden'),
             'clear'     => true,
             'priority'  => 120,
-            'options'   => coopcycle_shipping_date_options(),
+            'options'   => $options,
         );
 
         return $fields;
@@ -144,19 +114,28 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     /**
      * It is not easy to add extra fields depending on shipping method
+     * This appends HTML *AFTER* the radio button to choose shipping rate
      * @see https://github.com/woocommerce/woocommerce/issues/15753
      */
     function coopcycle_after_shipping_rate($method, $index) {
 
-        // Show custom fields for accepted shipping methods
+        // We check if the desired shipping method is checked to toggle form fields
         if (CoopCycle::accept_shipping_method($method->get_method_id())) {
-            echo '<script>';
-            echo 'document.querySelector("#shipping_date_time_heading").classList.remove("form-row-hidden");';
-            echo 'document.querySelector("#shipping_date_field").classList.remove("form-row-hidden");';
+            echo "<script>\n";
+            echo "(function () {\n";
+            echo "  var input = document.querySelector('#shipping_date_field');\n";
+            echo "  var heading = document.querySelector('#shipping_date_time_heading');\n";
+            echo "  var isChecked = document.querySelector('#shipping_method input[type=\"radio\"][value=\"{$method->id}\"]:checked');\n";
+            echo "  if (isChecked) {\n";
+            echo "    input && input.classList.remove('form-row-hidden');\n";
+            echo "    heading && heading.classList.remove('form-row-hidden');\n";
+            echo "  } else {\n";
+            echo "    input && input.classList.add('form-row-hidden');\n";
+            echo "    heading && heading.classList.add('form-row-hidden');\n";
+            echo "  }\n";
+            echo "})();\n";
             echo '</script>';
         }
-
-        // TODO Hide fields when shipping method has changed
     }
 
     add_filter('woocommerce_form_field', 'coopcycle_form_field', 10, 4);
@@ -165,7 +144,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
     add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
-
 
     /* Add custom columns to "shop_order" post list */
 

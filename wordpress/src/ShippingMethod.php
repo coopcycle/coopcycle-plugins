@@ -33,6 +33,19 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
             $this->init();
         }
 
+        public static function instance() {
+
+            $shipping_methods = WC()->shipping()->get_shipping_methods();
+
+            foreach ($shipping_methods as $id => $shipping_method) {
+                if ($id === 'coopcycle_shipping_method') {
+                    return $shipping_method;
+                }
+            }
+
+            return false;
+        }
+
         public function init_form_fields()
         {
             $this->instance_form_fields = array(
@@ -53,8 +66,53 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
             add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         }
 
+        public function get_shipping_date_options()
+        {
+            $http_client = new CoopCycle_HttpClient();
+
+            $options = array();
+
+            try {
+
+                $me = $http_client->get('/api/me');
+                $store = $http_client->get($me['store']);
+
+                if (isset($store['timeSlot'])) {
+
+                    $time_slot = $http_client->get($store['timeSlot']);
+
+                    $date_periods = CoopCycle::time_slot_to_date_periods($time_slot);
+                    foreach ($date_periods as $date_period) {
+                        $value = sprintf('%s %s-%s',
+                            $date_period->getStartDate()->format('Y-m-d'),
+                            $date_period->getStartDate()->format('H:i'),
+                            $date_period->getEndDate()->format('H:i')
+                        );
+                        $label = sprintf(__('%s between %s and %s'),
+                            date_i18n('l d F', $date_period->getStartDate()->getTimestamp()),
+                            $date_period->getStartDate()->format('H:i'),
+                            $date_period->getEndDate()->format('H:i')
+                        );
+                        $options[$value] = $label;
+                    }
+                }
+
+            } catch (\Exception $e) {
+                // TODO Log error
+            }
+
+            return $options;
+        }
+
         public function calculate_shipping($package = array())
         {
+            $options = $this->get_shipping_date_options();
+
+            // If there are no choices, skip this shipping method
+            if (empty($options)) {
+                return;
+            }
+
             // country
             // state
             // postcode
