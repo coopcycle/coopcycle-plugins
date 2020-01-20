@@ -1,62 +1,55 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CoopCycle Wordpress Plugin\n"
-"POT-Creation-Date: 2018-10-12 20:19+0200\n"
-"PO-Revision-Date: 2018-10-12 20:22+0200\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coopcycle\n"
+"POT-Creation-Date: 2020-01-20T09:57:48+00:00\n"
+"PO-Revision-Date: 2020-01-20 11:06+0100\n"
+"Last-Translator: \n"
 "Language-Team: dev@coopcycle.org\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 2.2.4\n"
 "X-Poedit-Basepath: ../..\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-KeywordsList: __\n"
-"Last-Translator: \n"
-"Language: fr\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: coopcycle.php:112
-msgid "Shipping date"
-msgstr "Date de livraison"
-
-#: coopcycle.php:118
-#, php-format
-msgid "The next shipping date is %s"
-msgstr "La prochaine date de livraison est %s"
-
-#: coopcycle.php:120
-msgid "Please choose your preferred time for shipping below"
-msgstr "Veuillez choisir votre date de livraison préférée ci-dessous"
-
-#: coopcycle.php:130
-msgid "Shipping time"
-msgstr "Heure de livraison"
-
-#: coopcycle.php:139
-msgid "Please choose a shipping date."
-msgstr "Veuillez choisir une date de livraison."
-
-#: src/CoopCycleSettingsPage.php:35
-msgid "Settings"
-msgstr "Réglages"
-
-#: src/ShippingMethod.php:16 src/ShippingMethod.php:17
-#: src/ShippingMethod.php:43
+#. Plugin Name of the plugin
+#: src/ShippingMethod.php:18 src/ShippingMethod.php:19
+#: src/ShippingMethod.php:60
 msgid "CoopCycle"
 msgstr ""
 
-#: src/ShippingMethod.php:18
+#. Plugin URI of the plugin
+msgid "https://coopcycle.org/"
+msgstr ""
+
+#. Description of the plugin
+msgid "CoopCycle plugin for WordPress"
+msgstr "CoopCycle pour WordPress"
+
+#: coopcycle.php:52
+msgid "Please choose a shipping date."
+msgstr "Veuillez choisir une date de livraison."
+
+#: coopcycle.php:78
+msgid "Please choose your preferred time for shipping below"
+msgstr "Veuillez choisir votre date de livraison préférée ci-dessous"
+
+#: coopcycle.php:118 coopcycle.php:173
+msgid "Shipping date"
+msgstr "Date de livraison"
+
+#: src/ShippingMethod.php:20
 msgid "Allow customers to get delivered by a local coop running CoopCycle"
 msgstr "Permet aux clients d’être livrés par une coopérative utilisant CoopCycle"
 
-#: src/ShippingMethod.php:40
+#: src/ShippingMethod.php:57
 msgid "Title"
 msgstr "Titre"
 
-#: src/ShippingMethod.php:42
-msgid "This controls the title which the user sees during checkout."
-msgstr "Ceci contrôle le titre que l’utilisateur voit lors de la commande."
-
-#: theme/functions.php:37
-msgid "Ajouter au panier"
-msgstr ""
+#: src/ShippingMethod.php:93
+msgid "%s between %s and %s"
+msgstr "%s entre %s et %s"
