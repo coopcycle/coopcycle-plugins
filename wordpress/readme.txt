@@ -2,7 +2,7 @@
 Contributors: alexmex
 Donate link: https://opencollective.com/coopcycle
 Tags: ecommerce, woocommerce, shipping
-Requires at least: 5.1
+Requires at least: 5.0
 Tested up to: 5.3.2
 Requires PHP: 7.0
 Stable tag: trunk
@@ -27,6 +27,9 @@ Once installed and configured, it communicates with a CoopCycle server via an HT
 == Screenshots ==
 
 == Changelog ==
+
+= 0.8.4 =
+* Update translations.
 
 == Upgrade Notice ==
 
