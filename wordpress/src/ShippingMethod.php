@@ -90,7 +90,7 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
                         );
-                        $label = sprintf(__('%s between %s and %s'),
+                        $label = sprintf(__('%s between %s and %s', 'coopcycle'),
                             date_i18n('l d F', $date_period->getStartDate()->getTimestamp()),
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
