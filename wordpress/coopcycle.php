@@ -132,31 +132,35 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      * It is not easy to add extra fields depending on shipping method
      * This appends HTML *AFTER* the radio button to choose shipping rate
      * @see https://github.com/woocommerce/woocommerce/issues/15753
+     * @see https://github.com/woocommerce/woocommerce/blob/6ecf05a197b8742e3a68718b5fdf714a5f7886c1/templates/cart/cart-shipping.php#L35-L39
      */
     function coopcycle_after_shipping_rate($method, $index) {
 
+        $accepted_shipping_methods = CoopCycle::get_accepted_shipping_methods();
+
         // We check if the desired shipping method is checked to toggle form fields
-        if (CoopCycle::accept_shipping_method($method->get_method_id())) {
-            echo "<script>\n";
-            echo "(function () {\n";
+        echo "<script>\n";
+        echo "(function () {\n";
 
-            echo "  var input = document.querySelector('#shipping_date_field');\n";
-            echo "  var heading = document.querySelector('#shipping_date_time_heading');\n";
+        echo "  var input = document.querySelector('#shipping_date_field');\n";
+        echo "  var heading = document.querySelector('#shipping_date_time_heading');\n";
+        echo "  var shippingMethods = ".json_encode($accepted_shipping_methods).";\n";
 
-            echo "  var hiddenField = document.querySelector('#shipping_method input[type=\"hidden\"][value=\"{$method->id}\"]');\n";
-            echo "  var radioButton = document.querySelector('#shipping_method input[type=\"radio\"][value=\"{$method->id}\"]');\n";
+        echo "  for (var i = 0; i < shippingMethods.length; i++) {\n";
+        echo "    var hiddenField = document.querySelector('#shipping_method input[type=\"hidden\"][value^=\"' + shippingMethods[i] + ':\"]');\n";
+        echo "    var radioButton = document.querySelector('#shipping_method input[type=\"radio\"][value^=\"' + shippingMethods[i] + ':\"]');\n";
+        echo "    if (hiddenField || (radioButton && radioButton.checked)) {\n";
+        echo "      input && input.classList.remove('form-row-hidden');\n";
+        echo "      heading && heading.classList.remove('form-row-hidden');\n";
+        echo "      break;\n";
+        echo "    } else {\n";
+        echo "      input && input.classList.add('form-row-hidden');\n";
+        echo "      heading && heading.classList.add('form-row-hidden');\n";
+        echo "    }\n";
+        echo "  }\n";
 
-            echo "  if (hiddenField || (radioButton && radioButton.checked)) {\n";
-            echo "    input && input.classList.remove('form-row-hidden');\n";
-            echo "    heading && heading.classList.remove('form-row-hidden');\n";
-            echo "  } else {\n";
-            echo "    input && input.classList.add('form-row-hidden');\n";
-            echo "    heading && heading.classList.add('form-row-hidden');\n";
-            echo "  }\n";
-
-            echo "})();\n";
-            echo '</script>';
-        }
+        echo "})();\n";
+        echo '</script>';
     }
 
     add_filter('woocommerce_form_field', 'coopcycle_form_field', 10, 4);
