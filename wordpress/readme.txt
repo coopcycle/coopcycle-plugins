@@ -28,6 +28,9 @@ Once installed and configured, it communicates with a CoopCycle server via an HT
 
 == Changelog ==
 
+= 0.9.0 =
+* Fix time slot dropdown not appearing on free shipping.
+
 = 0.8.4 =
 * Update translations.
 
