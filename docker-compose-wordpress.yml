@@ -1,12 +1,11 @@
 # https://github.com/chriszarate/docker-compose-wordpress
-# https://github.com/WordPress/gutenberg/blob/master/docker-compose.yml
 
 version: '3.3'
 
 services:
 
   wordpress_db:
-    image: mariadb:latest
+    image: mariadb:10.3
     volumes:
       - wordpress_dbdata:/var/lib/mysql
     restart: always
@@ -17,7 +16,7 @@ services:
       MYSQL_PASSWORD: wordpress
 
   wordpress:
-    image: wordpress:latest
+    image: wordpress:5.2-apache
     depends_on:
       - wordpress_db
     ports:
@@ -28,18 +27,19 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
     volumes:
-      - wordpress:/var/www/html
-      - ./wordpress:/var/www/html/wp-content/plugins/coopcycle
+      - "wordpress:/var/www/html:rw"
+      - "./wordpress:/var/www/html/wp-content/plugins/coopcycle:ro"
 
   wp:
-    image: wordpress:cli
+    image: wordpress:cli-2.2.0-php7.3
     # https://github.com/docker-library/wordpress/issues/256
     user: xfs
     depends_on:
+      - wordpress_db
       - wordpress
     volumes:
-      - wordpress:/var/www/html
-      - ./wordpress:/var/www/html/wp-content/plugins/coopcycle
+      - "wordpress:/var/www/html:rw"
+      - "./wordpress:/var/www/html/wp-content/plugins/coopcycle:ro"
     # $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
     entrypoint:
       - bash
