@@ -106,8 +106,16 @@ class CoopCycle
 
                 $range = new \DatePeriod($opens, $closes->diff($opens), $closes);
 
-                if ($range->getStartDate() > $now) {
-                    $ranges[] = $range;
+                if (isset($time_slot['priorNotice']) && !empty($time_slot['priorNotice'])) {
+                    $startWithNotice = clone $range->getStartDate();
+                    $startWithNotice->modify(sprintf('-%s', $time_slot['priorNotice']));
+                    if ($startWithNotice > $now) {
+                        $ranges[] = $range;
+                    }
+                } else {
+                    if ($range->getStartDate() > $now) {
+                        $ranges[] = $range;
+                    }
                 }
             }
 
