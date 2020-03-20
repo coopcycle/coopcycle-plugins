@@ -28,6 +28,9 @@ Once installed and configured, it communicates with a CoopCycle server via an HT
 
 == Changelog ==
 
+= 0.9.2 =
+* Add order number in task comments.
+
 = 0.9.1 =
 * Implement prior notice for time slots.
 
