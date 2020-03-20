@@ -248,7 +248,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         'contactName' => $contact_name,
                     ),
                     'timeSlot' => $shipping_date,
-                    'comments' => $order->get_customer_note(),
+                    'comments' => $order->get_order_number()."\n\n".$order->get_customer_note(),
                 )
             );
 
