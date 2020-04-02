@@ -103,13 +103,17 @@ class Coopcycle extends CarrierModule
 
         $brandName = $settings['brand_name'];
 
+        // @see https://github.com/PrestaShop/PrestaShop/blob/9051227101b198586a2f88597e03b07dffc0bc39/classes/Cart.php#L3646
+
         $carrier = new Carrier();
         $carrier->name = $brandName;
         $carrier->active = true;
         $carrier->shipping_handling = false;
         $carrier->need_range = true;
         $carrier->range_behavior = 0;
-        $carrier->shipping_external = true;
+        // We don't manage the shipping costs calculation via the API
+        // Instead, the shop owner has to configure shipping costs
+        $carrier->shipping_external = false;
         $carrier->is_module = true;
         $carrier->external_module_name = $this->name;
         $carrier->delay = array(
@@ -323,14 +327,18 @@ class Coopcycle extends CarrierModule
         );
     }
 
-    public function getOrderShippingCost($params, $shipping_cost)
+    /**
+     * @see https://github.com/PrestaShop/PrestaShop/blob/9051227101b198586a2f88597e03b07dffc0bc39/classes/Cart.php#L3646
+     */
+    public function getOrderShippingCost($cart, $shipping_cost)
     {
-        return 7.5;
+        // We don't modify the shipping cost
+        return $shipping_cost;
     }
 
-    public function getOrderShippingCostExternal($params)
+    public function getOrderShippingCostExternal($cart)
     {
-        return 10;
+        // Not implemented
     }
 
     private static function countNumberOfDays(array $ranges)
@@ -451,7 +459,12 @@ class Coopcycle extends CarrierModule
                         $options[$value] = $label;
                     }
 
-                    $output = '<select name="coopcycle_time_slot">';
+                    $output = '';
+
+                    $output .= '<div class="col-sm-12">';
+                    $output .= '<div class="form-group">';
+                    $output .= '<label class="form-control-label">Choisisez une plage horaire pour la livraison</label>';
+                    $output .= '<select name="coopcycle_time_slot" class="form-control form-control-select">';
                     foreach ($options as $value => $label) {
                         $selected = '';
                         if ($current_value && $value === $current_value) {
@@ -459,7 +472,9 @@ class Coopcycle extends CarrierModule
                         }
                         $output .= sprintf('<option value="%s"%s>%s</option>', $value, $selected, $label);
                     }
-                    $output .= '<select>';
+                    $output .= '</div>';
+                    $output .= '</select>';
+                    $output .= '</div>';
 
                     return $output;
                 }
