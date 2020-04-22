@@ -131,4 +131,18 @@ class CoopCycle
 
         return $ranges;
     }
+
+    public static function get_app_name()
+    {
+        $http_client = self::http_client();
+
+        $me = $http_client->get('/api/me');
+
+        if (isset($me['@context']) && $me['@context'] === '/api/contexts/ApiApp' && isset($me['name'])) {
+
+            return $me['name'];
+        }
+
+        return false;
+    }
 }

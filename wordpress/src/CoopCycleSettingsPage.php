@@ -42,9 +42,16 @@ class CoopCycleSettingsPage
 
     public function options_page()
     {
+        $app_name = get_option('coopcycle_app_name');
+
         ?>
         <div class="wrap">
             <h1>CoopCycle</h1>
+            <? if ($app_name) : ?>
+            <div class="notice notice-info">
+                <p><?php echo sprintf(__('Connected to app "%s"', 'coopcycle'), $app_name) ?></p>
+            </div>
+            <?php endif; ?>
             <form method="post" action="options.php">
             <?php
                 settings_fields('coopcycle_woocommerce');
@@ -280,6 +287,10 @@ class CoopCycleSettingsPage
                     add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API credentials are not valid'));
 
                     return $value;
+                }
+
+                if ($app_name = CoopCycle::get_app_name()) {
+                    update_option('coopcycle_app_name', $app_name);
                 }
             }
         }
