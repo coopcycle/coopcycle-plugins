@@ -238,9 +238,23 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 $shipping_address['last_name']
             )));
 
+            $wp_name = get_bloginfo('name');
+            $wp_url = get_bloginfo('url');
+
+            $task_comments =
+                sprintf(__('Order #%s from %s (%s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+
+            $customer_note = $order->get_customer_note();
+            if (!empty($customer_note)) {
+                $task_comments .= "\n\n".$customer_note;
+            }
+
             $data = array(
                 // We only specify the dropoff data
                 // Pickup is fully implicit
+                'pickup' => array(
+                    'comments' => $task_comments,
+                ),
                 'dropoff' => array(
                     'address' => array(
                         'streetAddress' => $street_address,
@@ -248,7 +262,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         'contactName' => $contact_name,
                     ),
                     'timeSlot' => $shipping_date,
-                    'comments' => $order->get_order_number()."\n\n".$order->get_customer_note(),
+                    'comments' => $task_comments,
                 )
             );
 
@@ -258,8 +272,12 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                 $delivery = $http_client->post('/api/deliveries', $data);
 
-                // Save task id in order meta
+                // Save useful info in order meta
+                $order->update_meta_data('coopcycle_delivery', $delivery['@id']);
+
+                // Legacy
                 $order->update_meta_data('task_id', $delivery['dropoff']['id']);
+
                 $order->save();
 
             } catch (HttpClientException $e) {
