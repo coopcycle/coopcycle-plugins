@@ -42,6 +42,9 @@ Check wordpress mail sender is correctly configured.
 
 == Changelog ==
 
+= 0.10.1 =
+* Fix potential syntax error.
+
 = 0.10.0 =
 * Stop calculating price via API.
 * Add more info in task comments.
