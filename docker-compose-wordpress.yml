@@ -40,6 +40,7 @@ services:
     volumes:
       - "wordpress:/var/www/html:rw"
       - "./wordpress:/var/www/html/wp-content/plugins/coopcycle:ro"
+      - "./wordpress/i18n/languages:/var/www/html/wp-content/plugins/coopcycle/i18n/languages:rw"
     # $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
     entrypoint:
       - bash
