@@ -47,7 +47,7 @@ class CoopCycleSettingsPage
         ?>
         <div class="wrap">
             <h1>CoopCycle</h1>
-            <? if ($app_name) : ?>
+            <?php if ($app_name) : ?>
             <div class="notice notice-info">
                 <p><?php echo sprintf(__('Connected to app "%s"', 'coopcycle'), $app_name) ?></p>
             </div>
