@@ -28,6 +28,10 @@ Once installed and configured, it communicates with a CoopCycle server via an HT
 
 == Changelog ==
 
+= 0.10.0 =
+* Stop calculating price via API.
+* Add more info in task comments.
+
 = 0.9.2 =
 * Add order number in task comments.
 
