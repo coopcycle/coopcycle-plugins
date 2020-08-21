@@ -76,23 +76,27 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
         $options = CoopCycle_ShippingMethod::instance()->get_shipping_date_options();
 
-        if (!$options) {
-            // TODO Show error saying there are no choices
-        }
-
-        ?>
-        <tr>
-            <th><strong><?php echo __('Shipping date', 'coopcycle') ?></strong></th>
-            <td>
-                <select name="shipping_date" class="coopcycle-shipping-date" required>
-                    <option value=""><?php echo __('Please choose your preferred time for shipping below', 'coopcycle') ?></option>
-                    <?php foreach ($options as $value => $label) : ?>
-                        <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
-                    <?php endforeach; ?>
-                </select>
+        if (count($options) > 0) {
+            ?>
+            <tr>
+                <th><strong><?php echo __('Shipping date', 'coopcycle') ?></strong></th>
+                <td>
+                    <select name="shipping_date" class="coopcycle-shipping-date" required>
+                        <option value=""><?php echo __('Please choose your preferred time for shipping below', 'coopcycle') ?></option>
+                        <?php foreach ($options as $value => $label) : ?>
+                            <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <?php
+        } else {
+            ?>
+            <td colspan="2">
+                <span><?php echo __('No time slot available for shipping', 'coopcycle') ?></span>
             </td>
-        </tr>
-        <?php
+            <?php
+        }
     }
 
     // add_action('woocommerce_after_shipping_calculator', 'coopcycle_shipping_date_dropdown');
