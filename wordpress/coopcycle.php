@@ -177,7 +177,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $wp_url = get_bloginfo('url');
 
             $task_comments =
-                sprintf(__('Order #%s from %s (%s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+                /* translators: order number, website, url. */
+                sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
 
             $customer_note = $order->get_customer_note();
             if (!empty($customer_note)) {
