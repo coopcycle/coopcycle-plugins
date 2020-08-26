@@ -49,7 +49,7 @@ class CoopCycleSettingsPage
             <h1>CoopCycle</h1>
             <?php if ($app_name) : ?>
             <div class="notice notice-info">
-                <p><?php echo sprintf(__('Connected to app "%s"', 'coopcycle'), $app_name) ?></p>
+                <p><?php /* translators: app name. */ echo sprintf(__('Connected to app "%s"', 'coopcycle'), $app_name) ?></p>
             </div>
             <?php endif; ?>
             <form method="post" action="options.php">
@@ -147,11 +147,11 @@ class CoopCycleSettingsPage
         $base_url = trim($base_url);
 
         if (empty($base_url)) {
-            add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Base URL is empty'));
+            add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Base URL is empty', 'coopcycle'));
         }
 
         if (0 === preg_match('#^https?://#', $base_url)) {
-            add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('The base URL must start with http:// or https://'));
+            add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('The base URL must start with http:// or https://', 'coopcycle'));
         }
 
         return $base_url;
@@ -162,7 +162,7 @@ class CoopCycleSettingsPage
         $api_key = trim($api_key);
 
         if (empty($api_key)) {
-            add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API key is empty'));
+            add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API key is empty', 'coopcycle'));
         }
 
         return $api_key;
@@ -173,7 +173,7 @@ class CoopCycleSettingsPage
         $api_secret = trim($api_secret);
 
         if (empty($api_secret)) {
-            add_settings_error('coopcycle_api_secret', 'coopcycle_api_secret', __('API secret is empty'));
+            add_settings_error('coopcycle_api_secret', 'coopcycle_api_secret', __('API secret is empty', 'coopcycle'));
         }
 
         return $api_secret;
@@ -185,7 +185,7 @@ class CoopCycleSettingsPage
         ?>
         <input class="regular-text" type="text"
             id="coopcycle_base_url" name="coopcycle_base_url" value="<?php echo isset($option) ? esc_attr($option) : '' ?>" />
-        <p class="description"><?php echo __('The base URL of the CoopCycle instance (must start with http:// or https://)') ?></p>
+        <p class="description"><?php echo __('The base URL of the CoopCycle instance (must start with http:// or https://)', 'coopcycle') ?></p>
         <?php
     }
 
@@ -272,19 +272,19 @@ class CoopCycleSettingsPage
             if (count(get_settings_errors()) === 0 && $base_url && $api_key && $api_secret) {
 
                 if (!$entrypoint = $this->get_entrypoint($base_url)) {
-                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle'));
+                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle', 'coopcycle'));
 
                     return $value;
                 }
 
                 if (!$this->validate_entrypoint($entrypoint)) {
-                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle'));
+                    add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Server is not compatible with CoopCycle', 'coopcycle'));
 
                     return $value;
                 }
 
                 if (!$this->validate_credentials($base_url, $api_key, $api_secret)) {
-                    add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API credentials are not valid'));
+                    add_settings_error('coopcycle_api_key', 'coopcycle_api_key', __('API credentials are not valid', 'coopcycle'));
 
                     return $value;
                 }

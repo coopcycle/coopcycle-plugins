@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoopCycle Wordpress Plugin\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coopcycle\n"
-"POT-Creation-Date: 2020-04-22T09:48:23+00:00\n"
-"PO-Revision-Date: 2020-04-22 11:51+0200\n"
+"POT-Creation-Date: 2020-08-21T09:41:45+00:00\n"
+"PO-Revision-Date: 2020-08-21 11:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: dev@coopcycle.org\n"
 "Language: fr\n"
@@ -34,29 +34,64 @@ msgstr "CoopCycle pour WordPress"
 msgid "Please choose a shipping date."
 msgstr "Veuillez choisir une date de livraison."
 
-#: coopcycle.php:78
-msgid "Please choose your preferred time for shipping below"
-msgstr "Veuillez choisir votre date de livraison préférée ci-dessous"
-
-#: coopcycle.php:118 coopcycle.php:177
+#: coopcycle.php:82 coopcycle.php:112
 msgid "Shipping date"
 msgstr "Date de livraison"
 
-#: coopcycle.php:245
-msgid "Order #%s from %s (%s)"
-msgstr "Commande #%s depuis %s (%s)"
+#: coopcycle.php:85
+msgid "Please choose your preferred time for shipping below"
+msgstr "Veuillez choisir votre date de livraison préférée ci-dessous"
+
+#: coopcycle.php:96
+msgid "No time slot available for shipping"
+msgstr "Aucun créneau de livraison disponible"
+
+#. translators: order number, website, url.
+#: coopcycle.php:181
+msgid "Order #%1$s from %2$s (%3$s)"
+msgstr "Commande #%1$s depuis %2$s (%3$s)"
 
 #: src/ShippingMethod.php:23
 msgid "Allow customers to get delivered by a local coop running CoopCycle"
 msgstr "Permet aux clients d’être livrés par une coopérative utilisant CoopCycle"
 
-#: src/ShippingMethod.php:86
-msgid "%s between %s and %s"
-msgstr "%s entre %s et %s"
+#. translators: date, start time, end time.
+#: src/ShippingMethod.php:87
+msgid "%1$s between %2$s and %3$s"
+msgstr "%1$s entre %2$s et %3$s"
 
+#. translators: app name.
 #: src/CoopCycleSettingsPage.php:52
 msgid "Connected to app \"%s\""
 msgstr "Connecté à l’application « %s »"
+
+#: src/CoopCycleSettingsPage.php:150
+msgid "Base URL is empty"
+msgstr "L’URL est vide"
+
+#: src/CoopCycleSettingsPage.php:154
+msgid "The base URL must start with http:// or https://"
+msgstr "L’URL doit commencer par http:// ou https://"
+
+#: src/CoopCycleSettingsPage.php:165
+msgid "API key is empty"
+msgstr "La clé d’API est vide"
+
+#: src/CoopCycleSettingsPage.php:176
+msgid "API secret is empty"
+msgstr "La clé secrète est vide"
+
+#: src/CoopCycleSettingsPage.php:188
+msgid "The base URL of the CoopCycle instance (must start with http:// or https://)"
+msgstr "L’URL de l’instance CoopCycle (doit commencer par http:// ou https://)"
+
+#: src/CoopCycleSettingsPage.php:275 src/CoopCycleSettingsPage.php:281
+msgid "Server is not compatible with CoopCycle"
+msgstr "Le serveur n’est pas compatible avec CoopCycle"
+
+#: src/CoopCycleSettingsPage.php:287
+msgid "API credentials are not valid"
+msgstr "Les identifiants d’API ne sont pas valides"
 
 #~ msgid "Title"
 #~ msgstr "Titre"
