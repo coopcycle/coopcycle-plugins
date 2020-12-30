@@ -4,7 +4,7 @@
  * Plugin Name: CoopCycle
  * Plugin URI: https://coopcycle.org/
  * Description: CoopCycle plugin for WordPress
- * Version: 0.10.0
+ * Version: 0.11.0
  * Domain Path: /i18n/languages/
  */
 
@@ -66,106 +66,41 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     }
 
     /**
-     * We use this filter to prepend a separator before the "shipping_date" field
-     * @see https://github.com/woocommerce/woocommerce/blob/74693979db82198284a10e2610378a26a6a54939/includes/wc-template-functions.php#L2447
-     */
-    function coopcycle_form_field($field, $key, $args, $value) {
-
-        if ($key === 'shipping_date') {
-
-            // Make sure to include data-priority, or the row is reordered by JavaScript!
-            $separator = '<p class="form-row form-row-hidden" data-priority="'.$args['priority'].'" id="shipping_date_time_heading">'
-                . __('Please choose your preferred time for shipping below', 'coopcycle')
-                . '</p>';
-
-            return $separator . $field;
-        }
-
-        return $field;
-    }
-
-    /**
      * Add custom field to choose shipping date
-     * @see https://docs.woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/
      */
-    function coopcycle_checkout_fields($fields) {
+    function coopcycle_shipping_date_dropdown() {
 
-        if (!class_exists('CoopCycle_ShippingMethod')) {
-            return $fields;
+        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
+            return '';
         }
 
-        $shipping_method = CoopCycle_ShippingMethod::instance();
-        $options = $shipping_method->get_shipping_date_options();
+        $options = CoopCycle_ShippingMethod::instance()->get_shipping_date_options();
 
-        if (!$options) {
-            return $fields;
+        if (count($options) > 0) {
+            ?>
+            <tr>
+                <th><strong><?php echo __('Shipping date', 'coopcycle') ?></strong></th>
+                <td>
+                    <select name="shipping_date" class="coopcycle-shipping-date" required>
+                        <option value=""><?php echo __('Please choose your preferred time for shipping below', 'coopcycle') ?></option>
+                        <?php foreach ($options as $value => $label) : ?>
+                            <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <?php
+        } else {
+            ?>
+            <td colspan="2">
+                <span><?php echo __('No time slot available for shipping', 'coopcycle') ?></span>
+            </td>
+            <?php
         }
-
-        // Add an empty option at the beginning
-        $options_with_defaults = array('' => '');
-        foreach ($options as $key => $value) {
-            $options_with_defaults[$key] = $value;
-        }
-
-        $is_hidden = !CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids());
-        $css_class = array('form-row-wide');
-        if ($is_hidden) {
-            $css_class[] = 'form-row-hidden';
-        }
-
-        $fields['billing']['shipping_date'] = array(
-            'type'      => 'select',
-            'label'     => __('Shipping date', 'coopcycle'),
-            'required'  => true,
-            // Field is hidden by default, it will be shown via JavaScript
-            // @see coopcycle_after_shipping_rate
-            'class'     => $css_class,
-            'clear'     => true,
-            'priority'  => 120,
-            'options'   => $options_with_defaults,
-        );
-
-        return $fields;
     }
 
-    /**
-     * It is not easy to add extra fields depending on shipping method
-     * This appends HTML *AFTER* the radio button to choose shipping rate
-     * @see https://github.com/woocommerce/woocommerce/issues/15753
-     * @see https://github.com/woocommerce/woocommerce/blob/6ecf05a197b8742e3a68718b5fdf714a5f7886c1/templates/cart/cart-shipping.php#L35-L39
-     */
-    function coopcycle_after_shipping_rate($method, $index) {
-
-        $accepted_shipping_methods = CoopCycle::get_accepted_shipping_methods();
-
-        // We check if the desired shipping method is checked to toggle form fields
-        echo "<script>\n";
-        echo "(function () {\n";
-
-        echo "  var input = document.querySelector('#shipping_date_field');\n";
-        echo "  var heading = document.querySelector('#shipping_date_time_heading');\n";
-        echo "  var shippingMethods = ".json_encode($accepted_shipping_methods).";\n";
-
-        echo "  for (var i = 0; i < shippingMethods.length; i++) {\n";
-        echo "    var hiddenField = document.querySelector('#shipping_method input[type=\"hidden\"][value^=\"' + shippingMethods[i] + ':\"]');\n";
-        echo "    var radioButton = document.querySelector('#shipping_method input[type=\"radio\"][value^=\"' + shippingMethods[i] + ':\"]');\n";
-        echo "    if (hiddenField || (radioButton && radioButton.checked)) {\n";
-        echo "      input && input.classList.remove('form-row-hidden');\n";
-        echo "      heading && heading.classList.remove('form-row-hidden');\n";
-        echo "      break;\n";
-        echo "    } else {\n";
-        echo "      input && input.classList.add('form-row-hidden');\n";
-        echo "      heading && heading.classList.add('form-row-hidden');\n";
-        echo "    }\n";
-        echo "  }\n";
-
-        echo "})();\n";
-        echo '</script>';
-    }
-
-    add_filter('woocommerce_form_field', 'coopcycle_form_field', 10, 4);
-    add_filter('woocommerce_checkout_fields' , 'coopcycle_checkout_fields');
-    add_action('woocommerce_after_shipping_rate', 'coopcycle_after_shipping_rate', 10, 2);
+    // add_action('woocommerce_after_shipping_calculator', 'coopcycle_shipping_date_dropdown');
+    add_action('woocommerce_review_order_after_shipping', 'coopcycle_shipping_date_dropdown');
 
     add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
     add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
@@ -242,7 +177,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $wp_url = get_bloginfo('url');
 
             $task_comments =
-                sprintf(__('Order #%s from %s (%s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+                /* translators: order number, website, url. */
+                sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
 
             $customer_note = $order->get_customer_note();
             if (!empty($customer_note)) {

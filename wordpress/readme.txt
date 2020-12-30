@@ -42,6 +42,12 @@ Check wordpress mail sender is correctly configured.
 
 == Changelog ==
 
+= 0.11.0 =
+* Show dropdown to choose shipping date after shipping options.
+
+= 0.10.1 =
+* Fix potential syntax error.
+
 = 0.10.0 =
 * Stop calculating price via API.
 * Add more info in task comments.
