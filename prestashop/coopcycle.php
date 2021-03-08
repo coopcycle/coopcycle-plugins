@@ -20,7 +20,7 @@ class Coopcycle extends CarrierModule
     {
         $this->name = 'coopcycle';
         $this->tab = 'shipping_logistics';
-        $this->version = '0.1.0';
+        $this->version = '0.1.1';
         $this->author = 'CoopCycle Team';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
