@@ -479,15 +479,24 @@ class Coopcycle extends CarrierModule
 
                     $date_periods = self::timeSlotToDatePeriods($time_slot);
 
+                    $fmt = datefmt_create(
+                        $this->context->language->iso_code,
+                        null,
+                        null,
+                        null,
+                        null,
+                        'EEEE d MMMM'
+                    );
+
                     $options = array();
                     foreach ($date_periods as $date_period) {
                         $value = sprintf('%s %s-%s',
-                            $date_period->getStartDate()->format('Y-m-d'),
+                            datefmt_format($fmt, $date_period->getStartDate()->getTimestamp()),
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
                         );
                         $label = sprintf('%s between %s and %s',
-                            $date_period->getStartDate()->format('Y-m-d'),
+                            datefmt_format($fmt, $date_period->getStartDate()->getTimestamp()),
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
                         );
