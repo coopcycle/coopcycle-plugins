@@ -52,7 +52,13 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
+        // PS 1.7+
         if (!$this->registerHook('displayCarrierExtraContent')) {
+            return false;
+        }
+
+        // PS 1.6
+        if (!$this->registerHook('displayCarrierList')) {
             return false;
         }
 
@@ -90,6 +96,10 @@ class Coopcycle extends CarrierModule
         }
 
         if (!$this->unregisterHook('displayCarrierExtraContent')) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('displayCarrierList')) {
             return false;
         }
 
@@ -424,6 +434,15 @@ class Coopcycle extends CarrierModule
         if ((int) $params['id_carrier'] === (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
             Configuration::updateValue(self::CONFIG_PREFIX . 'CARRIER_ID', $params['carrier']->id);
         }
+    }
+
+    public function hookDisplayCarrierList($params)
+    {
+        if ($params['cart']->id_carrier === (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
+            return $this->hookDisplayCarrierExtraContent($params);
+        }
+
+        return '';
     }
 
     public function hookDisplayCarrierExtraContent($params)
