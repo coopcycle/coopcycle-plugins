@@ -29,7 +29,7 @@ class Coopcycle extends CarrierModule
         parent::__construct();
 
         $this->displayName = $this->l('CoopCycle');
-        $this->description = $this->l('Description of my module.');
+        $this->description = $this->l('Allow customers to get delivered by a local coop running CoopCycle');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
@@ -118,9 +118,9 @@ class Coopcycle extends CarrierModule
         $carrier->external_module_name = $this->name;
         $carrier->delay = array(
             Language::getIdByIso('en') =>
-                $this->trans('Delivery by bike with %brand_name%', array('%brand_name%' => $brandName), 'Modules.CoopCycle.Admin'),
+                sprintf($this->l('Delivery by bike with %s'), $brandName),
             Language::getIdByIso('fr') =>
-                $this->trans('Livraison en vélo avec %brand_name%', array('%brand_name%' => $brandName), 'Modules.CoopCycle.Admin'),
+                sprintf($this->l('Livraison en vélo avec %s'), $brandName),
         );
 
         if (!$carrier->add()) {
@@ -219,15 +219,15 @@ class Coopcycle extends CarrierModule
         if (Tools::isSubmit('submitCoopCycleConfig')) {
 
             if (!$baseURL = Tools::getValue('COOPCYCLE_BASE_URL')) {
-                return $this->displayError($this->trans('URL of CoopCycle server is required', [], 'Modules.CoopCycle.Admin'));
+                return $this->displayError($this->l('URL of CoopCycle server is required'));
             }
 
             if (!$apiKey = Tools::getValue('COOPCYCLE_API_KEY')) {
-                return $this->displayError($this->trans('API key is required', [], 'Modules.CoopCycle.Admin'));
+                return $this->displayError($this->l('API key is required'));
             }
 
             if (!$apiSecret = Tools::getValue('COOPCYCLE_API_SECRET')) {
-                return $this->displayError($this->trans('API secret is required', [], 'Modules.CoopCycle.Admin'));
+                return $this->displayError($this->l('API secret is required'));
             }
 
             $baseURL = trim($baseURL, '/ ');
@@ -241,13 +241,13 @@ class Coopcycle extends CarrierModule
             $isEntrypointValid = isset($res['@context']) && $res['@context'] === '/api/contexts/Entrypoint';
 
             if (!$isEntrypointValid) {
-                return $this->displayError($this->trans('Server with URL "%url%" is not compatible', [
-                    '%url%' => $baseURL,
-                ], 'Modules.CoopCycle.Admin'));
+                return $this->displayError(
+                    sprintf($this->l('Server with URL "%s" is not compatible'), $baseURL)
+                );
             }
 
             if (!$accessToken = $this->accessToken()) {
-                return $this->displayError($this->trans('Credentials are not valid', [], 'Modules.CoopCycle.Admin'));
+                return $this->displayError($this->l('Credentials are not valid'));
             }
 
             Configuration::updateValue(self::CONFIG_PREFIX . 'BASE_URL', $baseURL);
@@ -271,10 +271,10 @@ class Coopcycle extends CarrierModule
                 'id_form' => 'step_carrier_general',
                 'input' => array(),
                 'submit' => array(
-                    'title' => $this->trans('Save', array(), 'Admin.Actions'),
+                    'title' => $this->l('Save'),
                     'class' => 'btn btn-default pull-right submit_dash_config',
                     'reset' => array(
-                        'title' => $this->trans('Cancel', array(), 'Admin.Actions'),
+                        'title' => $this->l('Cancel'),
                         'class' => 'btn btn-default cancel_dash_config',
                     )
                 )
@@ -282,19 +282,19 @@ class Coopcycle extends CarrierModule
         );
 
         $fields_form['form']['input'][] = array(
-            'label' => $this->trans('URL of CoopCycle server', array(), 'Modules.CoopCycle.Admin'),
+            'label' => $this->l('URL of CoopCycle server'),
             'name' => 'COOPCYCLE_BASE_URL',
             'type' => 'text',
         );
 
         $fields_form['form']['input'][] = array(
-            'label' => $this->trans('API key', array(), 'Modules.CoopCycle.Admin'),
+            'label' => $this->l('API key'),
             'name' => 'COOPCYCLE_API_KEY',
             'type' => 'text',
         );
 
         $fields_form['form']['input'][] = array(
-            'label' => $this->trans('API secret', array(), 'Modules.CoopCycle.Admin'),
+            'label' => $this->l('API secret'),
             'name' => 'COOPCYCLE_API_SECRET',
             'type' => 'text',
         );
