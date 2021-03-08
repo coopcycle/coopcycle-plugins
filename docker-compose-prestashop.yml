@@ -6,18 +6,16 @@ services:
     image: mariadb:latest
     volumes:
       - prestashop_dbdata:/var/lib/mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
 
   prestashop:
-    image: prestashop/prestashop:latest
+    image: prestashop/prestashop:1.6
     depends_on:
       - db
     ports:
       - "8082:80"
-    restart: always
     environment:
       PS_DEV_MODE: 1 # The constant _PS_MODE_DEV_ will be set at true (default value: 0)
       # PS_HOST_MODE: The constant _PS_HOST_MODE_ will be set at true. Useful to simulate a PrestaShop Cloud environment. (default value: 0)
