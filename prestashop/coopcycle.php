@@ -144,9 +144,9 @@ class Coopcycle extends CarrierModule
         $carrier->external_module_name = $this->name;
         $carrier->delay = array(
             Language::getIdByIso('en') =>
-                sprintf($this->l('Delivery by bike with %s'), $brandName),
+                sprintf('Delivery by bike with %s', $brandName),
             Language::getIdByIso('fr') =>
-                sprintf($this->l('Livraison en vélo avec %s'), $brandName),
+                sprintf('Livraison en vélo avec %s', $brandName),
         );
 
         if (!$carrier->add()) {
@@ -495,7 +495,7 @@ class Coopcycle extends CarrierModule
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
                         );
-                        $label = sprintf('%s between %s and %s',
+                        $label = sprintf($this->l('%s between %s and %s'),
                             datefmt_format($fmt, $date_period->getStartDate()->getTimestamp()),
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
@@ -507,7 +507,7 @@ class Coopcycle extends CarrierModule
 
                     $output .= '<div class="col-sm-12">';
                     $output .= '<div class="form-group">';
-                    $output .= '<label class="form-control-label">Choisisez une plage horaire pour la livraison</label>';
+                    $output .= '<label class="form-control-label">'.$this->l('Choose a time slot for delivery').'</label>';
                     $output .= '<select name="coopcycle_time_slot" class="form-control form-control-select">';
                     foreach ($options as $value => $label) {
                         $selected = '';
