@@ -21,7 +21,7 @@ jobs:
       # PS_FOLDER_INSTALL: Change the name of the install folder (default value: install. But must be changed anyway later)
       # PS_ENABLE_SSL: Enable SSL at PrestaShop installation. (default value: 0)
     docker:
-      - image: prestashop/prestashop:latest
+      - image: prestashop/prestashop:1.6
       - image: mariadb:latest
         environment:
           MYSQL_ROOT_PASSWORD: admin
