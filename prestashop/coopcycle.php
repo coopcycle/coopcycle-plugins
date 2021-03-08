@@ -44,11 +44,19 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
-        if (!$this->registerHook('updateCarrier')) {
+        if (!$this->registerHook('actionCarrierUpdate')) {
+            return false;
+        }
+
+        if (!$this->registerHook('actionCarrierProcess')) {
             return false;
         }
 
         if (!$this->registerHook('displayCarrierExtraContent')) {
+            return false;
+        }
+
+        if (!$this->registerHook('actionOrderStatusPostUpdate')) {
             return false;
         }
 
@@ -73,11 +81,19 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
-        if (!$this->unregisterHook('updateCarrier')) {
+        if (!$this->unregisterHook('actionCarrierUpdate')) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('actionCarrierProcess')) {
             return false;
         }
 
         if (!$this->unregisterHook('displayCarrierExtraContent')) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('actionOrderStatusPostUpdate')) {
             return false;
         }
 
