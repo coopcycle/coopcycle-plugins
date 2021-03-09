@@ -11,6 +11,7 @@ require_once dirname(__FILE__).'/classes/CartTimeSlot.php';
  * @see http://doc.prestashop.com/pages/viewpage.action?pageId=15171738
  * @see https://stackoverflow.com/questions/28408612/prestashop-change-order-status-when-payment-is-validated
  * @see https://github.com/PrestaEdit/Canvas-Module-Prestashop-15
+ * @see https://github.com/quadra-informatique/Colissimo_Simplicite-PrestaShop/
  */
 class Coopcycle extends CarrierModule
 {
@@ -62,6 +63,10 @@ class Coopcycle extends CarrierModule
             return false;
         }
 
+        if (!$this->registerHook('actionValidateOrder')) {
+            return false;
+        }
+
         if (!$this->registerHook('actionOrderStatusPostUpdate')) {
             return false;
         }
@@ -100,6 +105,10 @@ class Coopcycle extends CarrierModule
         }
 
         if (!$this->unregisterHook('displayCarrierList')) {
+            return false;
+        }
+
+        if (!$this->unregisterHook('actionValidateOrder')) {
             return false;
         }
 
@@ -491,7 +500,7 @@ class Coopcycle extends CarrierModule
                     $options = array();
                     foreach ($date_periods as $date_period) {
                         $value = sprintf('%s %s-%s',
-                            datefmt_format($fmt, $date_period->getStartDate()->getTimestamp()),
+                            $date_period->getStartDate()->format('Y-m-d'),
                             $date_period->getStartDate()->format('H:i'),
                             $date_period->getEndDate()->format('H:i')
                         );
@@ -540,13 +549,23 @@ class Coopcycle extends CarrierModule
             return;
         }
 
-        if (!Tools::isSubmit('confirmDeliveryOption')) {
+        // if (!Tools::isSubmit('confirmDeliveryOption')) {
+        //     return;
+        // }
+
+        if ($params['cart']->id_carrier !== (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
             return;
         }
 
         if (!$time_slot = Tools::getValue('coopcycle_time_slot')) {
+            // FIXME
+            // If no time slot was selected, trigger an error
             return;
         }
+
+        PrestaShopLogger::addLog(
+            sprintf('CoopCycle::hookActionCarrierProcess - time slot selected = "%s"', $time_slot),
+            1, null, 'Cart', (int) $cart->id, true);
 
         $cart_time_slot = new CoopCycleCartTimeSlot($cart->id);
         $cart_time_slot->time_slot = $time_slot;
@@ -555,7 +574,7 @@ class Coopcycle extends CarrierModule
     }
 
     /**
-     * array(
+     * @param $params array(
      *   'cart' => $this->context->cart,
      *   'order' => $order,
      *   'customer' => $this->context->customer,
@@ -563,9 +582,10 @@ class Coopcycle extends CarrierModule
      *   'orderStatus' => $order_status,
      * )
      */
-    // public function hookActionValidateOrder($params)
-    // {
-    // }
+    public function hookActionValidateOrder($params)
+    {
+        $this->createDeliveryFromOrder($params['order']);
+    }
 
     /**
      * @see OrderHistory::changeIdOrderState()
@@ -577,57 +597,71 @@ class Coopcycle extends CarrierModule
     public function hookActionOrderStatusPostUpdate($params)
     {
         if ((int) $params['newOrderStatus']->id === (int) Configuration::get('PS_OS_PAYMENT')) {
-
             $order = new Order((int) $params['id_order'], $this->context->language->id);
-
-            if (!Validate::isLoadedObject($order)) {
-                return;
-            }
-
-            if ((int) $order->id_carrier !== (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
-                return;
-            }
-
-            $cart_time_slot = new CoopCycleCartTimeSlot($order->id_cart);
-            if (!Validate::isLoadedObject($cart_time_slot)) {
-                return;
-            }
-
-            if (!$accessToken = $this->accessToken()) {
-                return;
-            }
-
-            $address = new Address((int) $order->id_address_delivery, $this->context->language->id);
-
-            $street_address = implode(' ', array(
-                $address->address1,
-                $address->postcode,
-                $address->city,
-            ));
-
-            $payload = array(
-                'dropoff' => array(
-                    'address' => array(
-                        'streetAddress' => $street_address,
-                        'description' => $address->other,
-                        'contactName' => trim(implode(' ', array($address->firstname, $address->lastname))),
-                    ),
-                    'timeSlot' => $cart_time_slot->time_slot,
-                )
-            );
-
-            if ($address->phone || $address->phone_mobile) {
-                $payload['dropoff']['address']['telephone'] = $address->phone ? $address->phone : $address->phone_mobile;
-            }
-
-            $delivery = $this->httpRequest('POST', '/api/deliveries', array(
-                'body_json' => $payload,
-                'headers' => array(
-                    sprintf('Authorization: Bearer %s', $accessToken),
-                    'Accept: application/ld+json',
-                    'Content-Type: application/ld+json',
-                ),
-            ));
+            $this->createDeliveryFromOrder($order);
         }
+    }
+
+    private function createDeliveryFromOrder(Order $order)
+    {
+        if (!Validate::isLoadedObject($order)) {
+            return;
+        }
+
+        PrestaShopLogger::addLog(
+            'CoopCycle::createDeliveryFromOrder',
+            1, null, 'Order', (int) $order->id, true);
+
+        if ((int) $order->id_carrier !== (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
+            PrestaShopLogger::addLog(
+                'CoopCycle::createDeliveryFromOrder - carrier does not match',
+                1, null, 'Order', (int) $order->id, true);
+            return;
+        }
+
+        $cart_time_slot = new CoopCycleCartTimeSlot($order->id_cart);
+
+        if (!Validate::isLoadedObject($cart_time_slot)) {
+            PrestaShopLogger::addLog(
+                'CoopCycle::createDeliveryFromOrder - cart does not have a time slot',
+                1, null, 'Order', (int) $order->id, true);
+            return;
+        }
+
+        if (!$accessToken = $this->accessToken()) {
+            return;
+        }
+
+        $address = new Address((int) $order->id_address_delivery, $this->context->language->id);
+
+        $street_address = implode(' ', array(
+            $address->address1,
+            $address->postcode,
+            $address->city,
+        ));
+
+        $payload = array(
+            'dropoff' => array(
+                'address' => array(
+                    'streetAddress' => $street_address,
+                    'description' => $address->other,
+                    'contactName' => trim(implode(' ', array($address->firstname, $address->lastname))),
+                ),
+                'timeSlot' => $cart_time_slot->time_slot,
+            )
+        );
+
+        if ($address->phone || $address->phone_mobile) {
+            $payload['dropoff']['address']['telephone'] = $address->phone ? $address->phone : $address->phone_mobile;
+        }
+
+        $delivery = $this->httpRequest('POST', '/api/deliveries', array(
+            'body_json' => $payload,
+            'headers' => array(
+                sprintf('Authorization: Bearer %s', $accessToken),
+                'Accept: application/ld+json',
+                'Content-Type: application/ld+json',
+            ),
+        ));
     }
 }
