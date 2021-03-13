@@ -21,7 +21,7 @@ jobs:
       # PS_FOLDER_INSTALL: Change the name of the install folder (default value: install. But must be changed anyway later)
       # PS_ENABLE_SSL: Enable SSL at PrestaShop installation. (default value: 0)
     docker:
-      - image: prestashop/prestashop:latest
+      - image: prestashop/prestashop:1.6
       - image: mariadb:latest
         environment:
           MYSQL_ROOT_PASSWORD: admin
@@ -34,6 +34,12 @@ jobs:
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
           environment:
             DOCKERIZE_VERSION: v0.6.1
+      # https://github.com/nenes25/prestashop_console
+      - run:
+          name: Install PrestaShop console
+          command: |
+            wget https://github.com/nenes25/prestashop_console/releases/latest/download/prestashopConsole.phar -O /var/www/html/prestashopConsole.phar
+            chmod +x /var/www/html/prestashopConsole.phar
       - run:
           name: Waiting for MySQL to be ready
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
@@ -57,14 +63,13 @@ jobs:
             --newsletter=0
             --send_email=0
             --ssl=0
-      # https://devdocs.prestashop.com/1.7/modules/concepts/commands/
+      # https://github.com/nenes25/prestashop_console/blob/master/COMMANDS.md#moduleinstall
       - run:
           name: Install CoopCycle module
           command: |
             mv ./prestashop /var/www/html/modules/coopcycle
-            ls -l /var/www/html/modules/
             cd /var/www/html
-            php bin/console prestashop:module install coopcycle
+            ./prestashopConsole.phar module:install coopcycle
 
 workflows:
   version: 2
