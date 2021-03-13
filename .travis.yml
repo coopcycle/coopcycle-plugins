@@ -9,6 +9,7 @@ matrix:
 language: php
 php:
   - '7.3.12'
+  - '8.0.3'
 
 cache:
   apt: true
