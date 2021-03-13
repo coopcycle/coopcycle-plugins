@@ -3,7 +3,7 @@ Contributors: alexmex
 Donate link: https://opencollective.com/coopcycle
 Tags: ecommerce, woocommerce, shipping
 Requires at least: 5.0
-Tested up to: 5.4.2
+Tested up to: 5.7
 Requires PHP: 7.0
 Stable tag: trunk
 License: GPLv2 or later
