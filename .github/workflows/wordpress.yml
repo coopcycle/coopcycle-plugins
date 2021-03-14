@@ -4,12 +4,17 @@ jobs:
   WORDPRESS_UNIT_TESTS:
     name: Run WordPress plugin unit tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php_version:
+          - '7.4'
+          - '8.0'
     steps:
       - uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php_version }}
           tools: composer:v2
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-progress --no-suggest --no-scripts
