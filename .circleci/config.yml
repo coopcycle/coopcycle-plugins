@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Install PrestaShop console
           command: |
-            wget https://github.com/nenes25/prestashop_console/releases/latest/download/prestashopConsole.phar -O /var/www/html/prestashopConsole.phar
+            wget https://github.com/nenes25/prestashop_console/blob/dev/bin/prestashopConsole.phar -O /var/www/html/prestashopConsole.phar
             chmod +x /var/www/html/prestashopConsole.phar
       - run:
           name: Waiting for MySQL to be ready
