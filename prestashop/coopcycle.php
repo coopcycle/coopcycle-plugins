@@ -4,6 +4,7 @@ if (!defined('_PS_VERSION_'))
   exit;
 
 require_once dirname(__FILE__).'/classes/CartTimeSlot.php';
+require_once dirname(__FILE__).'/classes/OrderTracking.php';
 
 /**
  * @see https://belvg.com/blog/how-to-create-shipping-module-for-prestashop.html
@@ -21,7 +22,7 @@ class Coopcycle extends CarrierModule
     {
         $this->name = 'coopcycle';
         $this->tab = 'shipping_logistics';
-        $this->version = '0.1.2';
+        $this->version = '0.1.3';
         $this->author = 'CoopCycle Team';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -663,5 +664,10 @@ class Coopcycle extends CarrierModule
                 'Content-Type: application/ld+json',
             ),
         ));
+
+        $order_tracking = new CoopCycleOrderTracking($order->id);
+        $order_tracking->delivery = $delivery['@id'];
+
+        $order_tracking->save();
     }
 }
