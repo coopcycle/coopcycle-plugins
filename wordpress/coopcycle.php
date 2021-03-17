@@ -194,13 +194,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'dropoff' => array(
                     'address' => array(
                         'streetAddress' => $street_address,
-                        'telephone' => get_user_meta($order->get_customer_id(), 'billing_phone', true),
                         'contactName' => $contact_name,
                     ),
                     'timeSlot' => $shipping_date,
                     'comments' => $task_comments,
                 )
             );
+
+            $phone_number = get_user_meta($order->get_customer_id(), 'billing_phone', true);
+            if (!$phone_number) {
+                $phone_number = $order->get_billing_phone();
+            }
+
+            if ($phone_number) {
+                $data['dropoff']['address']['telephone'] = $phone_number;
+            }
 
             $http_client = CoopCycle::http_client();
 
