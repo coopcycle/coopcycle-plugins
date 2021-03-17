@@ -42,6 +42,9 @@ Check wordpress mail sender is correctly configured.
 
 == Changelog ==
 
+= 0.11.1 =
+* Retrieve phone number when using guest checkout.
+
 = 0.11.0 =
 * Show dropdown to choose shipping date after shipping options.
 
