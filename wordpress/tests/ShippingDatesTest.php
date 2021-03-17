@@ -78,5 +78,22 @@ class ShippingDatesTest extends TestCase
         $this->assertEquals($this->makeDatePeriod('2019-12-19 19:00', '2019-12-19 20:30'), $ranges[0]);
         $this->assertEquals($this->makeDatePeriod('2019-12-24 18:00', '2019-12-24 19:00'), $ranges[1]);
         $this->assertEquals($this->makeDatePeriod('2019-12-24 19:00', '2019-12-24 20:30'), $ranges[2]);
+
+        $ranges = \CoopCycle::time_slot_to_date_periods($time_slot, new \DateTime('2019-12-19 16:07:00'));
+
+        $this->assertCount(4, $ranges);
+        $this->assertEquals($this->makeDatePeriod('2019-12-24 18:00', '2019-12-24 19:00'), $ranges[0]);
+    }
+
+    public function testTimeSlotToDatePeriodsWithPriorNotice2()
+    {
+        require_once __DIR__ . '/../src/CoopCycle.php';
+
+        $time_slot = json_decode(file_get_contents(__DIR__ . '/payloads/prior_notice.json'), true);
+
+        $ranges = \CoopCycle::time_slot_to_date_periods($time_slot, new \DateTime('2021-03-16 21:26:00'));
+
+        $this->assertCount(12, $ranges);
+        $this->assertEquals($this->makeDatePeriod('2021-03-17 18:00', '2021-03-17 18:30'), $ranges[0]);
     }
 }
