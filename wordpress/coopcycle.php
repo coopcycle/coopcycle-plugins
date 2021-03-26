@@ -146,6 +146,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 return;
             }
 
+            // Avoid creating the delivery twice
+            // if the order changes to "processing" more than once
+            $coopcycle_delivery = $order->get_meta('coopcycle_delivery', true);
+            if (!empty($coopcycle_delivery)) {
+                return;
+            }
+
             $shipping_date = $order->get_meta('shipping_date', true);
 
             // Array
