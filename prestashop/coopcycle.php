@@ -234,7 +234,7 @@ class Coopcycle extends CarrierModule
 
         $httpCode = !curl_errno($ch) ? curl_getinfo($ch, CURLINFO_HTTP_CODE) : null;
 
-        if ($httpCode !== 200) {
+        if (!in_array($httpCode, [200, 201, 204])) {
             curl_close($ch);
 
             return false;
@@ -585,7 +585,9 @@ class Coopcycle extends CarrierModule
      */
     public function hookActionValidateOrder($params)
     {
-        $this->createDeliveryFromOrder($params['order']);
+        if ((int) $params['orderStatus']->id === (int) Configuration::get('PS_OS_PAYMENT')) {
+            $this->createDeliveryFromOrder($params['order']);
+        }
     }
 
     /**
@@ -612,6 +614,14 @@ class Coopcycle extends CarrierModule
         PrestaShopLogger::addLog(
             'CoopCycle::createDeliveryFromOrder',
             1, null, 'Order', (int) $order->id, true);
+
+        // Make sure we don't create the delivery twice
+        if (CoopCycleOrderTracking::existsFor($order)) {
+            PrestaShopLogger::addLog(
+                'CoopCycle::createDeliveryFromOrder - delivery already exists, skipping',
+                1, null, 'Order', (int) $order->id, true);
+            return;
+        }
 
         if ((int) $order->id_carrier !== (int) Configuration::get(self::CONFIG_PREFIX . 'CARRIER_ID')) {
             PrestaShopLogger::addLog(
@@ -665,9 +675,21 @@ class Coopcycle extends CarrierModule
             ),
         ));
 
+        if (false === $delivery) {
+            PrestaShopLogger::addLog(
+                'CoopCycle::createDeliveryFromOrder - error, could not create delivery',
+                5, null, 'Order', (int) $order->id, true);
+
+            return;
+        }
+
         $order_tracking = new CoopCycleOrderTracking($order->id);
         $order_tracking->delivery = $delivery['@id'];
 
         $order_tracking->save();
+
+        PrestaShopLogger::addLog(
+            'CoopCycle::createDeliveryFromOrder - success',
+            1, null, 'Order', (int) $order->id, true);
     }
 }
