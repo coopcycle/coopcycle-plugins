@@ -42,6 +42,9 @@ Check wordpress mail sender is correctly configured.
 
 == Changelog ==
 
+= 0.11.3 =
+* Add Spanish translations.
+
 = 0.11.2 =
 * Avoid creating the delivery twice.
 
