@@ -1,6 +1,14 @@
 CoopCycle Plugins
 -----------------
 
+Before creating all the containers, you have to create a docker network that will be used to connect the different services.
+
+```
+docker network create coopcycle-web_default 
+```
+
+After this you will be able to execute the following commands.
+
 ### PrestaShop
 
 ```
