@@ -1,7 +1,7 @@
 CoopCycle Plugins
 -----------------
 
-Before creating all the containers, you have to create a docker network that will be used to connect the different services.
+Running this project supposes that you have the [coopcycle-web](https://github.com/coopcycle/coopcycle-web) project running. If you don't you will need to create a Docker network manually.
 
 ```
 docker network create coopcycle-web_default 
