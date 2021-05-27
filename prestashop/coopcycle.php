@@ -670,7 +670,12 @@ class Coopcycle extends CarrierModule
         }
 
         // We use the shop address as pickup address
-        $payload['pickup']['address'] = $this->stringifyAddress($shop->getAddress());
+        $shopAddress = $shop->getAddress();
+        if (!empty($shopAddress->address1) && !empty($shopAddress->city)) {
+            $payload['pickup']['address'] = $this->stringifyAddress($shopAddress);
+        }
+
+        // We send the order summary as text in comments
         $payload['pickup']['comments'] = $this->stringifyOrder($order);
 
         $delivery = $this->httpRequest('POST', '/api/deliveries', array(
@@ -704,7 +709,7 @@ class Coopcycle extends CarrierModule
     {
         return sprintf('%s, %s',
             $address->address1,
-            $address->postcode . ' ' . $address->city
+            trim($address->postcode . ' ' . $address->city)
         );
     }
 
