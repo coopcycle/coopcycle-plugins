@@ -645,18 +645,12 @@ class Coopcycle extends CarrierModule
 
         $address = new Address((int) $order->id_address_delivery, $this->context->language->id);
 
-        $street_address = implode(' ', array(
-            $address->address1,
-            $address->postcode,
-            $address->city,
-        ));
-
         $payload = array(
             'dropoff' => array(
                 'address' => array(
-                    'streetAddress' => $street_address,
-                    'description' => $address->other,
-                    'contactName' => trim(implode(' ', array($address->firstname, $address->lastname))),
+                    'streetAddress' => $this->stringifyAddress($address),
+                    'description'   => $address->other,
+                    'contactName'   => trim(implode(' ', array($address->firstname, $address->lastname))),
                 ),
                 'timeSlot' => $cart_time_slot->time_slot,
             )
@@ -665,6 +659,18 @@ class Coopcycle extends CarrierModule
         if ($address->phone || $address->phone_mobile) {
             $payload['dropoff']['address']['telephone'] = $address->phone ? $address->phone : $address->phone_mobile;
         }
+
+        $shop = new Shop((int) $order->id_shop);
+
+        if (!Validate::isLoadedObject($shop)) {
+            PrestaShopLogger::addLog(
+                sprintf('CoopCycle::createDeliveryFromOrder - shop with id %d could not be loaded', $order->id_shop),
+                1, null, 'Order', (int) $order->id, true);
+            return;
+        }
+
+        // We use the shop address as pickup address
+        $payload['pickup']['address'] = $this->stringifyAddress($shop->getAddress());
 
         $delivery = $this->httpRequest('POST', '/api/deliveries', array(
             'body_json' => $payload,
@@ -691,5 +697,13 @@ class Coopcycle extends CarrierModule
         PrestaShopLogger::addLog(
             'CoopCycle::createDeliveryFromOrder - success',
             1, null, 'Order', (int) $order->id, true);
+    }
+
+    private function stringifyAddress(Address $address)
+    {
+        return sprintf('%s, %s',
+            $address->address1,
+            $address->postcode . ' ' . $address->city
+        );
     }
 }
