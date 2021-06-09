@@ -670,9 +670,9 @@ class Coopcycle extends CarrierModule
         }
 
         // We use the shop address as pickup address
-        $shopAddress = $shop->getAddress();
-        if (!empty($shopAddress->address1) && !empty($shopAddress->city)) {
-            $payload['pickup']['address'] = $this->stringifyAddress($shopAddress);
+        $pickupAddress = $this->stringifyAddress($shop->getAddress());
+        if (!empty($pickupAddress)) {
+            $payload['pickup']['address'] = $pickupAddress;
         }
 
         // We send the order summary as text in comments
@@ -707,10 +707,22 @@ class Coopcycle extends CarrierModule
 
     private function stringifyAddress(Address $address)
     {
-        return sprintf('%s, %s',
-            $address->address1,
-            trim($address->postcode . ' ' . $address->city)
-        );
+        $parts = [];
+
+        if (!empty($address->address1)) {
+            $parts[] = $address->address1;
+        }
+
+        if (!empty($address->city)) {
+            $parts[] = trim($address->postcode . ' ' . $address->city);
+        }
+
+        if (count($parts) === 0) {
+
+            return '';
+        }
+
+        return implode(', ', $parts);
     }
 
     private function stringifyOrder(Order $order)
