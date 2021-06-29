@@ -729,6 +729,12 @@ class Coopcycle extends CarrierModule
     {
         $text = '';
 
+        $shop = new Shop((int) $order->id_shop);
+
+        if (Validate::isLoadedObject($shop)) {
+            $text .= sprintf("%s\n\n", $shop->name);
+        }
+
         foreach ($order->getProducts() as $product) {
             $text .= sprintf("%d × %s\n", (int) $product['product_quantity'], $product['product_name']);
         }
