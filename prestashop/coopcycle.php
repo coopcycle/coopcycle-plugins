@@ -669,11 +669,7 @@ class Coopcycle extends CarrierModule
             return;
         }
 
-        // We use the shop address as pickup address
-        $pickupAddress = $this->stringifyAddress($shop->getAddress());
-        if (!empty($pickupAddress)) {
-            $payload['pickup']['address'] = $pickupAddress;
-        }
+        $payload = $this->addPickupAddress($order, $shop, $payload);
 
         // We send the order summary as text in comments
         $payload['pickup']['comments'] = $this->stringifyOrder($order);
@@ -740,5 +736,38 @@ class Coopcycle extends CarrierModule
         }
 
         return $text;
+    }
+
+    /**
+     * @param Order $order
+     * @param array $payload
+     *
+     * @return array
+     */
+    private function addPickupAddress(Order $order, Shop $shop, array $payload)
+    {
+        $pickupAddress = array();
+
+        // We use the shop address as pickup address
+        $addressAsText = $this->stringifyAddress($shop->getAddress());
+        if (!empty($addressAsText)) {
+            $pickupAddress['streetAddress'] = $addressAsText;
+        }
+
+        $telephone = Configuration::get('PS_SHOP_PHONE');
+        if ($telephone) {
+            $pickupAddress['telephone'] = $telephone;
+        }
+
+        if (!empty($pickupAddress)) {
+
+            return array_merge($payload, array(
+                'pickup' => array(
+                    'address' => $pickupAddress,
+                )
+            ));
+        }
+
+        return $payload;
     }
 }
