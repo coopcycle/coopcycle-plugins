@@ -8,7 +8,6 @@ services:
     image: mariadb:10.3
     volumes:
       - wordpress_dbdata:/var/lib/mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wordpress
@@ -21,7 +20,6 @@ services:
       - wordpress_db
     ports:
       - "8083:80"
-    restart: always
     environment:
       WORDPRESS_DB_HOST: wordpress_db:3306
       WORDPRESS_DB_USER: wordpress
