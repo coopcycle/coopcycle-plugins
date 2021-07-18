@@ -17,6 +17,12 @@ docker-compose -f docker-compose-prestashop.yml up
 
 Then go to [localhost:8082](http://localhost:8082)
 
+#### Creating a release
+
+```
+make release-prestashop VERSION=<version>
+```
+
 ### Wordpress
 
 ```
@@ -30,7 +36,7 @@ You can use the following credentials to [login as an administrator](http://loca
 - Username: **admin**
 - Password: **admin**
 
-### Creating a release
+#### Creating a release
 
 ```
 make release-wordpress VERSION=<version>
