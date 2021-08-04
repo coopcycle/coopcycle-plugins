@@ -754,9 +754,9 @@ class Coopcycle extends CarrierModule
             $pickupAddress['streetAddress'] = $addressAsText;
         }
 
-        $telephone = Configuration::get('PS_SHOP_PHONE');
-        if ($telephone) {
-            $pickupAddress['telephone'] = $telephone;
+        $phone = $this->getPickupPhone($shop->getAddress());
+        if ($phone && Validate::isPhoneNumber($phone)) {
+            $pickupAddress['telephone'] = $phone;
         }
 
         if (!empty($pickupAddress)) {
@@ -769,5 +769,14 @@ class Coopcycle extends CarrierModule
         }
 
         return $payload;
+    }
+
+    private function getPickupPhone(Address $address)
+    {
+        if ($address->phone || $address->phone_mobile) {
+            return $address->phone ? $address->phone : $address->phone_mobile;
+        }
+
+        return Configuration::get('PS_SHOP_PHONE');
     }
 }
