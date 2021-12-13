@@ -183,14 +183,23 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $wp_name = get_bloginfo('name');
             $wp_url = get_bloginfo('url');
 
+            $items = "";
+
+            foreach ($order->get_items() as &$it) {
+                $items .= sprintf("%sx %s \n", $it->get_quantity(), $it->get_name());
+            }
+
             $task_comments =
                 /* translators: order number, website, url. */
-                sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+                sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), 
+                $order->get_order_number(), $wp_name, $wp_url);
 
             $customer_note = $order->get_customer_note();
             if (!empty($customer_note)) {
                 $task_comments .= "\n\n".$customer_note;
             }
+
+            $task_comments.= "\n******\nItems : \n".$items;
 
             $data = array(
                 // We only specify the dropoff data
