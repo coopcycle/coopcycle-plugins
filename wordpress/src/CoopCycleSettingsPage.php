@@ -144,7 +144,7 @@ class CoopCycleSettingsPage
 
     public function sanitize_base_url($base_url)
     {
-        $base_url = trim($base_url);
+        $base_url = trim($base_url, '/ ');
 
         if (empty($base_url)) {
             add_settings_error('coopcycle_base_url', 'coopcycle_base_url', __('Base URL is empty', 'coopcycle'));
