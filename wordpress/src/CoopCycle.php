@@ -77,9 +77,9 @@ class CoopCycle
     {
         if (null === $now) {
             $now = new \DateTime();
-            $endDate = new \DateTime();
         }
 
+        $endDate = clone $now;
         $endDate->modify("+{$time_slot['interval']}");
         $number_of_days = 0;
         $expected_number_of_days = $endDate->diff($now)->days;
