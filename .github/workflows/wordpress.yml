@@ -1,5 +1,5 @@
 name: Test
-on: push
+on: [push, pull_request]
 jobs:
   WORDPRESS_UNIT_TESTS:
     name: Run WordPress plugin unit tests
