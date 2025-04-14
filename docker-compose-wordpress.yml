@@ -1,7 +1,5 @@
 # https://github.com/chriszarate/docker-compose-wordpress
 
-version: '3.3'
-
 services:
 
   wordpress_db:
@@ -15,7 +13,7 @@ services:
       MYSQL_PASSWORD: wordpress
 
   wordpress:
-    image: wordpress:5.2-apache
+    image: wordpress:6.7-php8.3-apache
     depends_on:
       - wordpress_db
     ports:
@@ -24,14 +22,15 @@ services:
       WORDPRESS_DB_HOST: wordpress_db:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
     volumes:
       - "wordpress:/var/www/html:rw"
       - "./wordpress:/var/www/html/wp-content/plugins/coopcycle:ro"
 
   wp:
-    image: wordpress:cli-2.2.0-php7.3
+    image: wordpress:cli-2.11.0-php8.3
     # https://github.com/docker-library/wordpress/issues/256
-    user: xfs
+    user: "33:33"
     depends_on:
       - wordpress_db
       - wordpress
@@ -39,6 +38,11 @@ services:
       - "wordpress:/var/www/html:rw"
       - "./wordpress:/var/www/html/wp-content/plugins/coopcycle:ro"
       - "./wordpress/i18n/languages:/var/www/html/wp-content/plugins/coopcycle/i18n/languages:rw"
+    environment:
+      WORDPRESS_DB_HOST: wordpress_db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
     # $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
     entrypoint:
       - bash
@@ -56,13 +60,6 @@ services:
           wp plugin install woocommerce --activate
         else
           echo "WooCommerce is installed"
-        fi
-
-        if ! $$(wp plugin is-installed woocommerce-gateway-stripe); then
-          echo "Installing WooCommerce Stripe Payment Gateway…"
-          wp plugin install woocommerce-gateway-stripe --activate
-        else
-          echo "WooCommerce Stripe Payment Gateway is installed"
         fi
 
         if ! $$(wp theme is-installed storefront); then
