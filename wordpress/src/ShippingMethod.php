@@ -94,6 +94,7 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
                 }
 
             } catch (\Exception $e) {
+
                 // TODO Log error
             }
 

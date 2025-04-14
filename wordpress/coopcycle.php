@@ -22,9 +22,69 @@ function coopcycle_load_plugin_textdomain() {
 }
 add_action('plugins_loaded', 'coopcycle_load_plugin_textdomain');
 
+// https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block
+
+add_action(
+    'init',
+    function () {
+        register_block_type_from_metadata( __DIR__ . '/build/shipping-date-picker' );
+    }
+);
+
+function get_rest_shipping_date_options() {
+
+    $options = CoopCycle_ShippingMethod::instance()->get_shipping_date_options();
+
+    $data = [];
+    foreach ($options as $value => $label) {
+        $data[] = [
+            'value' => $value,
+            'label' => $label,
+        ];
+    }
+
+    return new WP_REST_Response(['options' => $data], 200);
+}
+
+add_action('rest_api_init', function () {
+  register_rest_route('coopcycle/v1', '/shipping-date-options', array(
+    'methods' => 'GET',
+    'callback' => 'get_rest_shipping_date_options',
+  ));
+});
+
+add_action(
+    'woocommerce_blocks_loaded',
+    function () {
+
+        require_once __DIR__ . '/coopcycle-blocks-integration.php';
+        require_once __DIR__ . '/coopcycle-extend-store-endpoint.php';
+        require_once __DIR__ . '/coopcycle-extend-woo-core.php';
+
+        add_action(
+            'woocommerce_blocks_cart_block_registration',
+            function ( $integration_registry ) {
+                $integration_registry->register( new Coopcycle_Blocks_Integration() );
+            }
+        );
+        add_action(
+            'woocommerce_blocks_checkout_block_registration',
+            function ( $integration_registry ) {
+                $integration_registry->register( new Coopcycle_Blocks_Integration() );
+            }
+        );
+
+        Coopcycle_Extend_Store_Endpoint::init();
+
+        $extend_core = new Coopcycle_Extend_Woo_Core();
+        $extend_core->init();
+    }
+);
+
 /**
  * Check if WooCommerce is active
  */
+// https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/check-if-woo-is-active.md
 if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 
     function coopcycle_shipping_method_init() {
@@ -40,101 +100,24 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     add_filter('woocommerce_shipping_methods', 'add_your_shipping_method');
 
-    function coopcycle_checkout_process() {
-        // TODO Make sure shipping time is valid
-
-        // Skip if another shipping method was chosen
-        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
-            return;
-        }
-
-        if (!$_POST['shipping_date'] || empty($_POST['shipping_date'])) {
-            wc_add_notice(__('Please choose a shipping date.', 'coopcycle'), 'error');
-        }
-    }
-
-    function coopcycle_checkout_update_order_meta($order_id) {
-
-        // Skip if another shipping method was chosen
-        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
-            return;
-        }
-
-        if (!empty($_POST['shipping_date'])) {
-            update_post_meta($order_id, 'shipping_date', sanitize_text_field($_POST['shipping_date']));
-        }
-    }
-
-    /**
-     * Add custom field to choose shipping date
-     */
-    function coopcycle_shipping_date_dropdown() {
-
-        if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
-            return '';
-        }
-
-        $options = CoopCycle_ShippingMethod::instance()->get_shipping_date_options();
-
-        if (count($options) > 0) {
-            ?>
-            <tr>
-                <th><strong><?php echo __('Shipping date', 'coopcycle') ?></strong></th>
-                <td>
-                    <select name="shipping_date" class="coopcycle-shipping-date" required>
-                        <option value=""><?php echo __('Please choose your preferred time for shipping below', 'coopcycle') ?></option>
-                        <?php foreach ($options as $value => $label) : ?>
-                            <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-            <?php
-        } else {
-            ?>
-            <td colspan="2">
-                <span><?php echo __('No time slot available for shipping', 'coopcycle') ?></span>
-            </td>
-            <?php
-        }
-    }
-
-    // add_action('woocommerce_after_shipping_calculator', 'coopcycle_shipping_date_dropdown');
-    add_action('woocommerce_review_order_after_shipping', 'coopcycle_shipping_date_dropdown');
-
-    add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
-    add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
-
-    /* Add custom columns to "shop_order" post list */
+    // Add custom columns to orders list
+    // https://stackoverflow.com/questions/36446617/add-columns-to-admin-orders-list-in-woocommerce-hpos
 
     function coopcycle_manage_shop_order_posts_columns($columns) {
         return array_merge($columns, array(
             'order_shipping_date' => __('Shipping date', 'coopcycle'),
         ));
     }
-    function coopcycle_manage_shop_order_posts_custom_column($column, $post_id) {
-
-        $shipping_date = get_post_meta($post_id, 'shipping_date', true);
-
-        // FIXME Make this backwards compatible
-
+    function coopcycle_manage_shop_order_posts_custom_column($column, $order) {
         if ($column === 'order_shipping_date') {
-
-            if ($shipping_date = get_post_meta($post_id, 'shipping_date', true)) {
+            if ($order->meta_exists('shipping_date')) {
                 // TODO Format as human readable
-                echo $shipping_date;
+                echo $order->get_meta('shipping_date');
             }
         }
     }
-    add_filter('manage_shop_order_posts_columns', 'coopcycle_manage_shop_order_posts_columns', 20);
-    add_action('manage_shop_order_posts_custom_column', 'coopcycle_manage_shop_order_posts_custom_column', 10, 2);
-
-    function coopcycle_enqueue_scripts() {
-        wp_register_style('coopcycle', plugins_url('/css/coopcycle.css', __FILE__), array(), false);
-        wp_enqueue_style('coopcycle');
-    }
-
-    add_action('wp_enqueue_scripts', 'coopcycle_enqueue_scripts');
+    add_filter('manage_woocommerce_page_wc-orders_columns', 'coopcycle_manage_shop_order_posts_columns', 20);
+    add_action('manage_woocommerce_page_wc-orders_custom_column', 'coopcycle_manage_shop_order_posts_custom_column', 10, 2);
 
     function coopcycle_woocommerce_order_status_changed($order_id, $old_status, $new_status) {
 

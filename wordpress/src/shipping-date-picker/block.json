@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "coopcycle/shipping-date-picker",
+	"version": "0.1.0",
+	"title": "Shipping Date Picker",
+	"category": "widgets",
+	"icon": "smiley",
+	"description": "Displays a dropdown to select a shipping date.",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"parent": [
+		"woocommerce/checkout-shipping-methods-block"
+	],
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"textdomain": "shipping-date-picker",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}
