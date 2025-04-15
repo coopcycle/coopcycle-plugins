@@ -12,7 +12,7 @@ After this you will be able to execute the following commands.
 ### PrestaShop
 
 ```
-docker-compose -f docker-compose-prestashop.yml up
+docker compose -f docker-compose-prestashop.yml up
 ```
 
 Then go to [localhost:8082](http://localhost:8082)
@@ -26,7 +26,7 @@ make release-prestashop VERSION=<version>
 ### Wordpress
 
 ```
-docker-compose -f docker-compose-wordpress.yml up
+docker compose -f docker-compose-wordpress.yml up
 ```
 
 Then go to [localhost:8083](http://localhost:8083)
