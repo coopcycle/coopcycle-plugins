@@ -1,20 +1,21 @@
-# Copyright (C) 2020 
+# Copyright (C) 2025 
 # This file is distributed under the same license as the CoopCycle plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoopCycle 0.11.0\n"
+"Project-Id-Version: CoopCycle 0.11.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coopcycle\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-08-21T09:41:45+00:00\n"
+"POT-Creation-Date: 2025-04-15T08:43:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.2.0\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: coopcycle\n"
 
 #. Plugin Name of the plugin
+#: coopcycle.php
 #: src/ShippingMethod.php:21
 #: src/ShippingMethod.php:22
 #: src/ShippingMethod.php:57
@@ -22,42 +23,22 @@ msgid "CoopCycle"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: coopcycle.php
 msgid "https://coopcycle.org/"
 msgstr ""
 
 #. Description of the plugin
+#: coopcycle.php
 msgid "CoopCycle plugin for WordPress"
 msgstr ""
 
-#: coopcycle.php:52
-msgid "Please choose a shipping date."
-msgstr ""
-
-#: coopcycle.php:82
-#: coopcycle.php:112
+#: coopcycle.php:108
 msgid "Shipping date"
 msgstr ""
 
-#: coopcycle.php:85
-msgid "Please choose your preferred time for shipping below"
-msgstr ""
-
-#: coopcycle.php:96
-msgid "No time slot available for shipping"
-msgstr ""
-
 #. translators: order number, website, url.
-#: coopcycle.php:181
+#: coopcycle.php:177
 msgid "Order #%1$s from %2$s (%3$s)"
-msgstr ""
-
-#: src/ShippingMethod.php:23
-msgid "Allow customers to get delivered by a local coop running CoopCycle"
-msgstr ""
-
-#. translators: date, start time, end time.
-#: src/ShippingMethod.php:87
-msgid "%1$s between %2$s and %3$s"
 msgstr ""
 
 #. translators: app name.
@@ -92,4 +73,25 @@ msgstr ""
 
 #: src/CoopCycleSettingsPage.php:287
 msgid "API credentials are not valid"
+msgstr ""
+
+#: src/ShippingMethod.php:23
+msgid "Allow customers to get delivered by a local coop running CoopCycle"
+msgstr ""
+
+#. translators: date, start time, end time.
+#: src/ShippingMethod.php:87
+msgid "%1$s between %2$s and %3$s"
+msgstr ""
+
+#: build/shipping-date-picker-block-frontend.js:1436
+#: src/shipping-date-picker/block.js:46
+#: build/shipping-date-picker-block-frontend.js:1388
+msgid "Please choose your preferred time for shipping below"
+msgstr ""
+
+#: build/shipping-date-picker-block-frontend.js:1444
+#: src/shipping-date-picker/block.js:53
+#: build/shipping-date-picker-block-frontend.js:1395
+msgid "Please choose a shipping date."
 msgstr ""

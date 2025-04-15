@@ -7,6 +7,7 @@ import { getSetting } from '@woocommerce/settings';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { SelectControl, Spinner } from '@wordpress/components'
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 
 const { shippingMethods } = getSetting('shipping-date-picker_data');
 
@@ -42,14 +43,14 @@ const Block = ( { children, checkoutExtensionData, cart } ) => {
 
         if (acceptShippingMethod && options.length === 0) {
             apiFetch( { path: '/coopcycle/v1/shipping-date-options' } ).then((data) => {
-                setOptions([ { label: 'Please select a shipping date', value: ''} ].concat(data.options))
+                setOptions([ { label: __('Please choose your preferred time for shipping below', 'coopcycle'), value: ''} ].concat(data.options))
             });
         }
 
         if (!shippingDate) {
             setValidationErrors( {
                 'coopcycle/shipping-date-picker': {
-                    message: 'You must select a shipping date',
+                    message: __('Please choose a shipping date.', 'coopcycle'),
                     hidden: false,
                 },
             } );
@@ -90,7 +91,7 @@ const Block = ( { children, checkoutExtensionData, cart } ) => {
             <SelectControl
                 __next40pxDefaultSize
                 __nextHasNoMarginBottom
-                label="Shipping date"
+                label={ __('Shipping date', 'coopcycle') }
                 options={ options }
                 onChange={ setShippingDate }
             />

@@ -4,61 +4,42 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoopCycle 0.11.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/coopcycle\n"
+"POT-Creation-Date: 2025-04-15T08:43:11+00:00\n"
+"PO-Revision-Date: 2025-04-15 10:53+0200\n"
+"Last-Translator: \n"
 "Language-Team: \n"
+"Language: es_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-08-21T09:41:45+00:00\n"
-"PO-Revision-Date: 2021-04-20 16:06+0200\n"
-"X-Generator: Poedit 2.4.2\n"
-"X-Domain: coopcycle\n"
-"Last-Translator: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: es_ES\n"
+"X-Generator: Poedit 3.6\n"
+"X-Domain: coopcycle\n"
 
 #. Plugin Name of the plugin
-#: src/ShippingMethod.php:21 src/ShippingMethod.php:22
+#: coopcycle.php src/ShippingMethod.php:21 src/ShippingMethod.php:22
 #: src/ShippingMethod.php:57
 msgid "CoopCycle"
 msgstr "CoopCycle"
 
 #. Plugin URI of the plugin
+#: coopcycle.php
 msgid "https://coopcycle.org/"
 msgstr "https://coopcycle.org/"
 
 #. Description of the plugin
+#: coopcycle.php
 msgid "CoopCycle plugin for WordPress"
 msgstr "CoopCycle plugin para WordPress"
 
-#: coopcycle.php:52
-msgid "Please choose a shipping date."
-msgstr "Por favor, elija un horario para la entrega."
-
-#: coopcycle.php:82 coopcycle.php:112
+#: coopcycle.php:108
 msgid "Shipping date"
 msgstr "Fecha de entrega"
 
-#: coopcycle.php:85
-msgid "Please choose your preferred time for shipping below"
-msgstr "Por favor, elija su horario preferido para la entrega a continuación"
-
-#: coopcycle.php:96
-msgid "No time slot available for shipping"
-msgstr "No hay franja horaria disponible para la entrega"
-
 #. translators: order number, website, url.
-#: coopcycle.php:181
+#: coopcycle.php:177
 msgid "Order #%1$s from %2$s (%3$s)"
 msgstr "Pedido #%1$s desde %2$s (%3$s)"
-
-#: src/ShippingMethod.php:23
-msgid "Allow customers to get delivered by a local coop running CoopCycle"
-msgstr "Permitir que los clientes elijan entregas de una cooperativa local que utiliza CoopCycle"
-
-#. translators: date, start time, end time.
-#: src/ShippingMethod.php:87
-msgid "%1$s between %2$s and %3$s"
-msgstr "%1$s entre %2$s y %3$s"
 
 #. translators: app name.
 #: src/CoopCycleSettingsPage.php:52
@@ -82,8 +63,11 @@ msgid "API secret is empty"
 msgstr "El secreto de la API está vacío"
 
 #: src/CoopCycleSettingsPage.php:188
-msgid "The base URL of the CoopCycle instance (must start with http:// or https://)"
-msgstr "La URL base de la instancia de CoopCycle (debe empezar por http:// o https://)"
+msgid ""
+"The base URL of the CoopCycle instance (must start with http:// or https://)"
+msgstr ""
+"La URL base de la instancia de CoopCycle (debe empezar por http:// o "
+"https://)"
 
 #: src/CoopCycleSettingsPage.php:275 src/CoopCycleSettingsPage.php:281
 msgid "Server is not compatible with CoopCycle"
@@ -92,3 +76,29 @@ msgstr "El servidor no es compatible con CoopCycle"
 #: src/CoopCycleSettingsPage.php:287
 msgid "API credentials are not valid"
 msgstr "Las credenciales de la API no son válidas"
+
+#: src/ShippingMethod.php:23
+msgid "Allow customers to get delivered by a local coop running CoopCycle"
+msgstr ""
+"Permitir que los clientes elijan entregas de una cooperativa local que "
+"utiliza CoopCycle"
+
+#. translators: date, start time, end time.
+#: src/ShippingMethod.php:87
+msgid "%1$s between %2$s and %3$s"
+msgstr "%1$s entre %2$s y %3$s"
+
+#: build/shipping-date-picker-block-frontend.js:1436
+#: src/shipping-date-picker/block.js:46
+#: build/shipping-date-picker-block-frontend.js:1388
+msgid "Please choose your preferred time for shipping below"
+msgstr "Por favor, elija su horario preferido para la entrega a continuación"
+
+#: build/shipping-date-picker-block-frontend.js:1444
+#: src/shipping-date-picker/block.js:53
+#: build/shipping-date-picker-block-frontend.js:1395
+msgid "Please choose a shipping date."
+msgstr "Por favor, elija un horario para la entrega."
+
+#~ msgid "No time slot available for shipping"
+#~ msgstr "No hay franja horaria disponible para la entrega"

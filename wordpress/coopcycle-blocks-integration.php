@@ -59,7 +59,7 @@ class Coopcycle_Blocks_Integration implements IntegrationInterface {
         );
         wp_set_script_translations(
             'shipping-date-picker-blocks-integration',
-            'shipping-date-picker',
+            'coopcycle',
             dirname( __FILE__ ) . '/i18n/languages'
         );
     }
@@ -120,7 +120,7 @@ class Coopcycle_Blocks_Integration implements IntegrationInterface {
         );
         wp_set_script_translations(
             'shipping-date-picker-block-frontend',
-            'shipping-date-picker',
+            'coopcycle',
             dirname( __FILE__ ) . '/i18n/languages'
         );
     }
