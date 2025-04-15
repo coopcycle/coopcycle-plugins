@@ -73,24 +73,8 @@ if (!class_exists('CoopCycle_ShippingMethod')) {
                 $store = $http_client->get($me['store']);
 
                 if (isset($store['timeSlot'])) {
-
-                    $time_slot = $http_client->get($store['timeSlot']);
-
-                    $date_periods = CoopCycle::time_slot_to_date_periods($time_slot);
-                    foreach ($date_periods as $date_period) {
-                        $value = sprintf('%s %s-%s',
-                            $date_period->getStartDate()->format('Y-m-d'),
-                            $date_period->getStartDate()->format('H:i'),
-                            $date_period->getEndDate()->format('H:i')
-                        );
-                        /* translators: date, start time, end time. */
-                        $label = sprintf(__('%1$s between %2$s and %3$s', 'coopcycle'),
-                            date_i18n('l d F', $date_period->getStartDate()->getTimestamp()),
-                            $date_period->getStartDate()->format('H:i'),
-                            $date_period->getEndDate()->format('H:i')
-                        );
-                        $options[$value] = $label;
-                    }
+                    $choices = $http_client->get($store['timeSlot'] . '/choices');
+                    $options = array_column($choices['choices'], 'label', 'value');
                 }
 
             } catch (\Exception $e) {
