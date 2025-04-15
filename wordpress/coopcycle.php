@@ -4,7 +4,7 @@
  * Plugin Name: CoopCycle
  * Plugin URI: https://coopcycle.org/
  * Description: CoopCycle plugin for WordPress
- * Version: 0.11.3
+ * Version: 1.0.0
  * Domain Path: /i18n/languages/
  */
 

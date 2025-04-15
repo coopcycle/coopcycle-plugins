@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== CoopCycle ===
 Contributors: alexmex
 Donate link: https://opencollective.com/coopcycle
 Tags: ecommerce, woocommerce, shipping
@@ -41,6 +41,9 @@ Check wordpress mail sender is correctly configured.
 == Screenshots ==
 
 == Changelog ==
+
+= 1.0.0 =
+* Rewrite plugin to work with latest WordPress & WooCommerce versions.
 
 = 0.11.3 =
 * Add Spanish translations.
