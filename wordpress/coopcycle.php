@@ -105,7 +105,7 @@ function coopcycle_init() {
 
         // Check if the shortcode is used
         // https://stackoverflow.com/questions/77948982/check-programatically-if-cart-or-checkout-blocks-are-used-in-woocommerce
-        if (!CartCheckoutUtils::is_cart_block_default()) {
+        if (!CartCheckoutUtils::is_checkout_block_default()) {
             require_once __DIR__ . '/legacy_shortcode.php';
         }
 
