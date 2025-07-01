@@ -42,6 +42,9 @@ Check wordpress mail sender is correctly configured.
 
 == Changelog ==
 
+= 1.1.0 =
+* Make it work with legacy shortcode.
+
 = 1.0.0 =
 * Rewrite plugin to work with latest WordPress & WooCommerce versions.
 
