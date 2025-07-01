@@ -11,16 +11,15 @@
 require_once __DIR__ . '/src/CoopCycle.php';
 require_once __DIR__ . '/src/HttpClient.php';
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 if (is_admin()) {
     require_once __DIR__ . '/src/CoopCycleSettingsPage.php';
     $settings_page = new CoopCycleSettingsPage();
     add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), array($settings_page, 'add_action_link'));
 }
 
-function coopcycle_load_plugin_textdomain() {
-    load_plugin_textdomain('coopcycle', false, basename(dirname( __FILE__ )) . '/i18n/languages/');
-}
-add_action('plugins_loaded', 'coopcycle_load_plugin_textdomain');
+add_action('plugins_loaded', 'coopcycle_init');
 
 // https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block
 
@@ -81,153 +80,148 @@ add_action(
     }
 );
 
-/**
- * Check if WooCommerce is active
- */
-// https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/check-if-woo-is-active.md
-if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+function coopcycle_init() {
 
-    function coopcycle_shipping_method_init() {
-        require __DIR__ . '/src/ShippingMethod.php';
-    }
+    load_plugin_textdomain('coopcycle', false, basename(dirname( __FILE__ )) . '/i18n/languages/');
 
-    add_action('woocommerce_shipping_init', 'coopcycle_shipping_method_init');
+    /**
+     * Check if WooCommerce is active
+     */
+    // https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/check-if-woo-is-active.md
+    if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 
-    function add_your_shipping_method($methods) {
-        $methods['coopcycle_shipping_method'] = 'CoopCycle_ShippingMethod';
-        return $methods;
-    }
-
-    add_filter('woocommerce_shipping_methods', 'add_your_shipping_method');
-
-    // Add custom columns to orders list
-    // https://stackoverflow.com/questions/36446617/add-columns-to-admin-orders-list-in-woocommerce-hpos
-
-    function coopcycle_manage_shop_order_posts_columns($columns) {
-        return array_merge($columns, array(
-            'order_shipping_date' => __('Shipping date', 'coopcycle'),
-        ));
-    }
-    function coopcycle_manage_shop_order_posts_custom_column($column, $order) {
-        if ($column === 'order_shipping_date') {
-            if ($order->meta_exists('shipping_date')) {
-                // TODO Format as human readable
-                echo $order->get_meta('shipping_date');
-            }
+        function coopcycle_shipping_method_init() {
+            require __DIR__ . '/src/ShippingMethod.php';
         }
-    }
-    add_filter('manage_woocommerce_page_wc-orders_columns', 'coopcycle_manage_shop_order_posts_columns', 20);
-    add_action('manage_woocommerce_page_wc-orders_custom_column', 'coopcycle_manage_shop_order_posts_custom_column', 10, 2);
 
-    function coopcycle_woocommerce_order_status_changed($order_id, $old_status, $new_status) {
+        add_action('woocommerce_shipping_init', 'coopcycle_shipping_method_init');
 
-        if ('processing' === $new_status) {
+        function add_your_shipping_method($methods) {
+            $methods['coopcycle_shipping_method'] = 'CoopCycle_ShippingMethod';
+            return $methods;
+        }
 
-            $order = wc_get_order($order_id);
+        add_filter('woocommerce_shipping_methods', 'add_your_shipping_method');
 
-            if (!CoopCycle::accept_order($order)) {
-                return;
-            }
+        // Check if the shortcode is used
+        // https://stackoverflow.com/questions/77948982/check-programatically-if-cart-or-checkout-blocks-are-used-in-woocommerce
+        if (!CartCheckoutUtils::is_checkout_block_default()) {
+            require_once __DIR__ . '/legacy_shortcode.php';
+        }
 
-            // Avoid creating the delivery twice
-            // if the order changes to "processing" more than once
-            $coopcycle_delivery = $order->get_meta('coopcycle_delivery', true);
-            if (!empty($coopcycle_delivery)) {
-                return;
-            }
+        require_once __DIR__ . '/custom_colums.php';
 
-            $shipping_date = $order->get_meta('shipping_date', true);
+        function coopcycle_woocommerce_order_status_changed($order_id, $old_status, $new_status) {
 
-            // Array
-            // (
-            //     [first_name]
-            //     [last_name]
-            //     [company]
-            //     [address_1]
-            //     [address_2]
-            //     [city]
-            //     [state]
-            //     [postcode]
-            //     [country]
-            // )
-            $shipping_address = $order->get_address('shipping');
+            if ('processing' === $new_status) {
 
-            $street_address = sprintf('%s %s %s',
-                $shipping_address['address_1'],
-                $shipping_address['postcode'],
-                $shipping_address['city']
-            );
+                $order = wc_get_order($order_id);
 
-            $contact_name = implode(' ', array_filter(array(
-                $shipping_address['first_name'],
-                $shipping_address['last_name']
-            )));
+                if (!CoopCycle::accept_order($order)) {
+                    return;
+                }
 
-            $wp_name = get_bloginfo('name');
-            $wp_url = get_bloginfo('url');
+                // Avoid creating the delivery twice
+                // if the order changes to "processing" more than once
+                $coopcycle_delivery = $order->get_meta('coopcycle_delivery', true);
+                if (!empty($coopcycle_delivery)) {
+                    return;
+                }
 
-            $items = "";
+                $shipping_date = $order->get_meta('shipping_date', true);
 
-            foreach ($order->get_items() as &$it) {
-                $items .= sprintf("%sx %s \n", $it->get_quantity(), $it->get_name());
-            }
+                // Array
+                // (
+                //     [first_name]
+                //     [last_name]
+                //     [company]
+                //     [address_1]
+                //     [address_2]
+                //     [city]
+                //     [state]
+                //     [postcode]
+                //     [country]
+                // )
+                $shipping_address = $order->get_address('shipping');
 
-            $task_comments =
-                /* translators: order number, website, url. */
-                sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+                $street_address = sprintf('%s %s %s',
+                    $shipping_address['address_1'],
+                    $shipping_address['postcode'],
+                    $shipping_address['city']
+                );
 
-            $customer_note = $order->get_customer_note();
-            if (!empty($customer_note)) {
-                $task_comments .= "\n\n".$customer_note;
-            }
+                $contact_name = implode(' ', array_filter(array(
+                    $shipping_address['first_name'],
+                    $shipping_address['last_name']
+                )));
 
-            $task_comments.= "\n******\nItems : \n".$items;
+                $wp_name = get_bloginfo('name');
+                $wp_url = get_bloginfo('url');
 
-            $data = array(
-                // We only specify the dropoff data
-                // Pickup is fully implicit
-                'pickup' => array(
-                    'comments' => $task_comments,
-                ),
-                'dropoff' => array(
-                    'address' => array(
-                        'streetAddress' => $street_address,
-                        'contactName' => $contact_name,
+                $items = "";
+
+                foreach ($order->get_items() as &$it) {
+                    $items .= sprintf("%sx %s \n", $it->get_quantity(), $it->get_name());
+                }
+
+                $task_comments =
+                    /* translators: order number, website, url. */
+                    sprintf(__('Order #%1$s from %2$s (%3$s)', 'coopcycle'), $order->get_order_number(), $wp_name, $wp_url);
+
+                $customer_note = $order->get_customer_note();
+                if (!empty($customer_note)) {
+                    $task_comments .= "\n\n".$customer_note;
+                }
+
+                $task_comments.= "\n******\nItems : \n".$items;
+
+                $data = array(
+                    // We only specify the dropoff data
+                    // Pickup is fully implicit
+                    'pickup' => array(
+                        'comments' => $task_comments,
                     ),
-                    'timeSlot' => $shipping_date,
-                    'comments' => $task_comments,
-                )
-            );
+                    'dropoff' => array(
+                        'address' => array(
+                            'streetAddress' => $street_address,
+                            'contactName' => $contact_name,
+                        ),
+                        'timeSlot' => $shipping_date,
+                        'comments' => $task_comments,
+                    )
+                );
 
-            $phone_number = get_user_meta($order->get_customer_id(), 'billing_phone', true);
-            if (!$phone_number) {
-                $phone_number = $order->get_billing_phone();
+                $phone_number = get_user_meta($order->get_customer_id(), 'billing_phone', true);
+                if (!$phone_number) {
+                    $phone_number = $order->get_billing_phone();
+                }
+
+                if ($phone_number) {
+                    $data['dropoff']['address']['telephone'] = $phone_number;
+                }
+
+                $http_client = CoopCycle::http_client();
+
+                try {
+
+                    $delivery = $http_client->post('/api/deliveries', $data);
+
+                    // Save useful info in order meta
+                    $order->update_meta_data('coopcycle_delivery', $delivery['@id']);
+
+                    // Legacy
+                    $order->update_meta_data('task_id', $delivery['dropoff']['id']);
+
+                    $order->save();
+
+                } catch (HttpClientException $e) {
+                    // TODO Store something to retry API call later?
+                }
+
             }
-
-            if ($phone_number) {
-                $data['dropoff']['address']['telephone'] = $phone_number;
-            }
-
-            $http_client = CoopCycle::http_client();
-
-            try {
-
-                $delivery = $http_client->post('/api/deliveries', $data);
-
-                // Save useful info in order meta
-                $order->update_meta_data('coopcycle_delivery', $delivery['@id']);
-
-                // Legacy
-                $order->update_meta_data('task_id', $delivery['dropoff']['id']);
-
-                $order->save();
-
-            } catch (HttpClientException $e) {
-                // TODO Store something to retry API call later?
-            }
-
         }
+
+        add_action('woocommerce_order_status_changed', 'coopcycle_woocommerce_order_status_changed', 10, 3);
     }
 
-    add_action('woocommerce_order_status_changed', 'coopcycle_woocommerce_order_status_changed', 10, 3);
 }
