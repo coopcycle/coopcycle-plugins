@@ -11,6 +11,8 @@
 require_once __DIR__ . '/src/CoopCycle.php';
 require_once __DIR__ . '/src/HttpClient.php';
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 if (is_admin()) {
     require_once __DIR__ . '/src/CoopCycleSettingsPage.php';
     $settings_page = new CoopCycleSettingsPage();
@@ -99,6 +101,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     }
 
     add_filter('woocommerce_shipping_methods', 'add_your_shipping_method');
+
+    // The checkout shortcode is used
+    if (!CartCheckoutUtils::is_cart_block_default()) {
+        require_once __DIR__ . '/legacy_shortcode.php';
+    }
 
     require_once __DIR__ . '/custom_colums.php';
 
