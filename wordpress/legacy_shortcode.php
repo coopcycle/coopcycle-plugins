@@ -1,6 +1,7 @@
 <?php
 
 function coopcycle_checkout_process() {
+
     // TODO Make sure shipping time is valid
 
     // Skip if another shipping method was chosen
@@ -13,7 +14,7 @@ function coopcycle_checkout_process() {
     }
 }
 
-function coopcycle_checkout_update_order_meta($order_id) {
+function coopcycle_checkout_create_order(WC_Order $order) {
 
     // Skip if another shipping method was chosen
     if (!CoopCycle::contains_accepted_shipping_method(wc_get_chosen_shipping_method_ids())) {
@@ -21,7 +22,7 @@ function coopcycle_checkout_update_order_meta($order_id) {
     }
 
     if (!empty($_POST['shipping_date'])) {
-        update_post_meta($order_id, 'shipping_date', sanitize_text_field($_POST['shipping_date']));
+        $order->update_meta_data('shipping_date', sanitize_text_field($_POST['shipping_date']));
     }
 }
 
@@ -68,6 +69,6 @@ add_action('woocommerce_review_order_after_shipping', 'coopcycle_shipping_date_d
 
 add_action('woocommerce_checkout_process', 'coopcycle_checkout_process');
 
-add_action('woocommerce_checkout_update_order_meta', 'coopcycle_checkout_update_order_meta');
+add_action('woocommerce_checkout_create_order', 'coopcycle_checkout_create_order', 10, 1);
 
 add_action('wp_enqueue_scripts', 'coopcycle_enqueue_scripts');
